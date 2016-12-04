@@ -35,6 +35,10 @@
 
 # Build folders (areyoukiddingme.gif)
 Debug\
+Debug (Static)\
+Release\
+Release (Static)\
+x64\
 Client\Debug\
 Server\Debug\
 .vs\
