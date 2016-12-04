@@ -23,7 +23,7 @@ void Text_Box::add_char(const char & character)
 	if (character >= ' ' && character <= '~') data += character;
 	// if the character is a backspace, erase the last character if it exists
 	else if ((unsigned)character == 8 && data.size() > 0) data.erase(--data.end());
-	
+
 	render();
 }
 void Text_Box::backspace()
@@ -84,6 +84,7 @@ Scrollable_Text_Display::Scrollable_Text_Display(const unsigned & set_x, const u
 void Scrollable_Text_Display::add(const std::string & add)
 {
 	data.push_back(add);
+	render();
 }
 void Scrollable_Text_Display::scroll(const Console_Framework::Scroll_Event::Direction & direction)
 {
