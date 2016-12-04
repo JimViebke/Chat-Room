@@ -41,6 +41,8 @@ Release (Static)\
 x64\
 Client\Debug\
 Server\Debug\
+Console_Framework\x64\
+applib-dist\lib-x64\
 .vs\
 
 *.idb
