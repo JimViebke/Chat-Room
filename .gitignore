@@ -48,3 +48,9 @@ applib-dist\lib-x64\
 *.idb
 *.pdb
 *.user
+*.iobj
+*.ipdb
+*.ilk
+*.sbr
+*.bsc
+*.sbr
