@@ -1,0 +1,53 @@
+#pragma once
+
+#pragma once
+
+/* Jim Viebke
+Apr 9 2016 */
+
+#include <string>
+
+#include "console_framework.h"
+
+class TUI_Element
+{
+protected:
+	unsigned _x, _y;
+
+	TUI_Element(const unsigned & set_x, const unsigned & set_y);
+};
+
+class Text_Box : public TUI_Element
+{
+private:
+	unsigned _width; // the width of the text box
+	std::string data;
+	Console_Framework::color_type text_color;
+
+public:
+	Text_Box(const unsigned & set_x, const unsigned & set_y, const unsigned & set_width, Console_Framework::color_type set_text_color);
+
+	void add_char(const char & character);
+	void backspace();
+	std::string get_contents() const;
+	void clear();
+
+private:
+	void render() const;
+};
+
+class Scrollable_Text_Display : public TUI_Element
+{
+private:
+	unsigned _height, _width, _scroll_height = 0;
+	std::vector<std::string> data;
+
+	void render();
+
+public:
+	Scrollable_Text_Display(const unsigned & set_x, const unsigned & set_y, const unsigned & set_height, const unsigned & set_width);
+
+	void add(const std::string & add);
+	void scroll(const Console_Framework::Scroll_Event::Direction & direction);
+	void clear();
+};
