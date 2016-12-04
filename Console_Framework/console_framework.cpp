@@ -190,13 +190,13 @@ void Console_Framework::clear_screen()
 	Console_API::fill_console_output_character_a(output_handle, (char)Color::black, width, height, COORD{ 0, 0 });
 }
 
-void Console_Framework::draw_color(const unsigned & x, const unsigned & y, const Console_Framework::Color & color)
+void Console_Framework::draw_color(const unsigned & x, const unsigned & y, const Console_Framework::color_type & color)
 {
 	// forward calls to write_console_output_attribute in the thin wrapper
 	// we're also changing the x,y format here to the API's type
 	Console_API::write_console_output_attribute(output_handle, y, x, (WORD)color);
 }
-void Console_Framework::draw_char(const unsigned & x, const unsigned & y, const char & character, const Console_Framework::Color & color)
+void Console_Framework::draw_char(const unsigned & x, const unsigned & y, const char & character, const Console_Framework::color_type & color)
 {
 	// forward calls to write_console_output_a in the thin wrapper
 

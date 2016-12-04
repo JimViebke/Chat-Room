@@ -117,8 +117,8 @@ public:
 
 	static void clear_screen();
 
-	static void draw_color(const unsigned & x, const unsigned & y, const Console_Framework::Color & color);
-	static void draw_char(const unsigned & x, const unsigned & y, const char & character, const Console_Framework::Color & color);
+	static void draw_color(const unsigned & x, const unsigned & y, const Console_Framework::color_type & color);
+	static void draw_char(const unsigned & x, const unsigned & y, const char & character, const Console_Framework::color_type & color);
 	static void draw_string(const unsigned & x, const unsigned & y, const std::string & data, const color_type & color);
 	static void draw_box(const unsigned & x, const unsigned & y, const unsigned & height, const unsigned & width, const color_type & color);
 
