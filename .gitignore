@@ -38,3 +38,6 @@ Debug\
 Client\Debug\
 Server\Debug\
 .vs\
+
+*.idb
+*.pdb
