@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{45D782DE-3C7A-4874-A98F-7BA915386BA4}</ProjectGuid>
+    <ProjectGuid>{AB6C7CE6-AAEF-4E09-8A1B-2C6E91AFACB5}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>SocketLibrary</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
@@ -126,6 +126,9 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
