@@ -123,44 +123,44 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)applib-dist\include;</IncludePath>
+    <IncludePath>$(SolutionDir)applib-dist\include\;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)applib-dist\lib-x86\</OutDir>
-    <TargetName>applib-mt-gd</TargetName>
+    <TargetName>conlib-mt-gd</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug (Static)|Win32'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)applib-dist\include;</IncludePath>
+    <IncludePath>$(SolutionDir)applib-dist\include\;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)applib-dist\lib-x86\</OutDir>
-    <TargetName>applib-mt-sgd</TargetName>
+    <TargetName>conlib-mt-sgd</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)applib-dist\include;</IncludePath>
     <OutDir>$(SolutionDir)applib-dist\lib-x86\</OutDir>
-    <TargetName>applib-mt</TargetName>
+    <TargetName>conlib-mt</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release (Static)|Win32'">
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)applib-dist\include;</IncludePath>
     <OutDir>$(SolutionDir)applib-dist\lib-x86\</OutDir>
-    <TargetName>applib-mt-s</TargetName>
+    <TargetName>conlib-mt-s</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)applib-dist\include;</IncludePath>
     <OutDir>$(SolutionDir)applib-dist\lib-x64\</OutDir>
-    <TargetName>applib-mt-gd</TargetName>
+    <TargetName>conlib-mt-gd</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug (Static)|x64'">
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)applib-dist\include;</IncludePath>
     <OutDir>$(SolutionDir)applib-dist\lib-x64\</OutDir>
-    <TargetName>applib-mt-sgd</TargetName>
+    <TargetName>conlib-mt-sgd</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)applib-dist\include;</IncludePath>
     <OutDir>$(SolutionDir)applib-dist\lib-x64\</OutDir>
-    <TargetName>applib-mt</TargetName>
+    <TargetName>conlib-mt</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release (Static)|x64'">
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)applib-dist\include;</IncludePath>
     <OutDir>$(SolutionDir)applib-dist\lib-x64\</OutDir>
-    <TargetName>applib-mt-s</TargetName>
+    <TargetName>conlib-mt-s</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
