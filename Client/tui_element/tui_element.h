@@ -25,7 +25,7 @@ private:
 	Console_Framework::color_type text_color;
 
 public:
-	Text_Box(const unsigned & set_x, const unsigned & set_y, const unsigned & set_width, Console_Framework::color_type set_text_color);
+	Text_Box(const unsigned & set_x, const unsigned & set_y, const unsigned & set_width, const Console_Framework::color_type & set_text_color);
 
 	void add_char(const char & character);
 	void backspace();

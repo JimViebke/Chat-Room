@@ -11,7 +11,7 @@ TUI_Element::TUI_Element(const unsigned & set_x, const unsigned & set_y) : _x(se
 
 
 
-Text_Box::Text_Box(const unsigned & set_x, const unsigned & set_y, const unsigned & set_width, const Console_Framework::color_type set_text_color)
+Text_Box::Text_Box(const unsigned & set_x, const unsigned & set_y, const unsigned & set_width, const Console_Framework::color_type & set_text_color)
 	: TUI_Element(set_x, set_y), _width(set_width), text_color(set_text_color)
 {
 	Console_Framework::draw_box(_x, _y, 1, _width, Console_Framework::Color::background_white);
@@ -19,7 +19,11 @@ Text_Box::Text_Box(const unsigned & set_x, const unsigned & set_y, const unsigne
 
 void Text_Box::add_char(const char & character)
 {
-	data += character;
+	// if the character should be rendered, save it
+	if (character >= ' ' && character <= '~') data += character;
+	// if the character is a backspace, erase the last character if it exists
+	else if ((unsigned)character == 8 && data.size() > 0) data.erase(--data.end());
+	
 	render();
 }
 void Text_Box::backspace()
@@ -34,7 +38,10 @@ std::string Text_Box::get_contents() const
 void Text_Box::clear()
 {
 	data.clear();
-	render();
+
+	Console_Framework::draw_box(_x, _y, 1, _width, Console_Framework::Color::background_white);
+
+	Console_Framework::set_cursor_position(_x, _y);
 }
 void Text_Box::render() const
 {
