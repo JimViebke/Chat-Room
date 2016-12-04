@@ -62,7 +62,7 @@ void Console_Framework::setup(const unsigned & set_height, const unsigned & set_
 
 	// create console in our own image
 	{ // temporary scope to destroy mode
-		DWORD mode = ENABLE_PROCESSED_INPUT | ENABLE_MOUSE_INPUT;
+		DWORD mode = ENABLE_WINDOW_INPUT | ENABLE_PROCESSED_INPUT | ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS; // fixed for Win10
 		Console_API::set_console_mode(input_handle, mode);
 	}
 
@@ -206,16 +206,16 @@ void Console_Framework::draw_char(const unsigned & x, const unsigned & y, const 
 	// we're also changing the x,y format here to the API's type
 	Console_API::write_character_a(output_handle, y, x, character);
 }
-void Console_Framework::draw_string(const unsigned & x, const unsigned & y, const std::string & data, const WORD & color)
+void Console_Framework::draw_string(const unsigned & x, const unsigned & y, const std::string & data, const color_type & color)
 {
 	std::vector<WORD> attributes(data.size(), color);
 	Console_API::write_output_character_a(output_handle, data, y, x); // invert x and y
 	Console_API::write_console_output_attribute(output_handle, y, x, attributes); // invert x and y
 }
-void Console_Framework::draw_box(const unsigned & x, const unsigned & y, const unsigned & height, const unsigned & width, const Console_Framework::Color & background_color)
+void Console_Framework::draw_box(const unsigned & x, const unsigned & y, const unsigned & height, const unsigned & width, const color_type & background_color)
 {
 	for (unsigned i = 0; i < height; ++i)
-		draw_string(x + i, y, std::string(width, ' '), (WORD)background_color);
+		draw_string(x + i, y, std::string(width, ' '), background_color);
 }
 
 void Console_Framework::set_cursor_position(const unsigned & x, const unsigned & y)
