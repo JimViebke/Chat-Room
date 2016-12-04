@@ -31,3 +31,9 @@
 *.db
 *.opendb
 *.suo
+*.log
+
+# Build folders (areyoukiddingme.gif)
+Debug\
+Client\Debug\
+Server\Debug\
