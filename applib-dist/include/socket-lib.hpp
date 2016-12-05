@@ -46,8 +46,8 @@ namespace pipedat
 		Connection(SOCKET sock);
 
 	public:
-		void send(std::string message);
-		std::string receive();
+		void send(std::string message) const;
+		std::string receive() const;
 
 		Connection(const std::string &ip_address, const unsigned &port);
 		Connection(const std::string &ip_address, const unsigned &port, const SocketType &type, const Protocol &proto);

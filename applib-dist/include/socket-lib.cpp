@@ -46,12 +46,12 @@ Connection::Connection(SOCKET sock)
 	con_socket = sock;
 }
 
-void Connection::send(std::string message)
+void Connection::send(std::string message) const
 {
 
 }
 
-std::string Connection::receive()
+std::string Connection::receive() const
 {
 	return "";
 }
