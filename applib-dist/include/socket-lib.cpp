@@ -60,7 +60,7 @@ std::string Connection::receive() const
 
 		// Check for a graceful disconnect OR a less graceful disconnect
 		if (data_read == 0)
-			return termination_string;
+			return "";
 		else if (data_read == -1)
 			throw new disgraceful_disconnect_exception("");
 
