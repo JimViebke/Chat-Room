@@ -39,9 +39,8 @@ Connection::Connection(const std::string &ip_address, const unsigned &port, cons
 	}
 }
 
-Connection::Connection(SOCKET sock, std::string client_termination_string)
+Connection::Connection(SOCKET sock)
 {
-	termination_string = client_termination_string;
 	con_socket = sock;
 }
 
@@ -77,16 +76,13 @@ std::string Connection::receive() const
 
 #pragma region ConnectionListener Functions
 
-ConnectionListener::ConnectionListener(const unsigned &port, const std::string &termination_string = "")
+ConnectionListener::ConnectionListener(const unsigned &port)
 {
-	ConnectionListener::ConnectionListener(port, SocketType::STREAM, Protocol::IPPROTO_TCP, termination_string);
+	ConnectionListener::ConnectionListener(port, SocketType::STREAM, Protocol::IPPROTO_TCP);
 }
 
-ConnectionListener::ConnectionListener(const unsigned &port, const SocketType &type, const Protocol &proto, const std::string &termination_string = "")
+ConnectionListener::ConnectionListener(const unsigned &port, const SocketType &type, const Protocol &proto)
 {
-	// Immediately default the termination string to an empty string. The user can use set_client_termination_string() to set a different termination string.
-	connection_termination_string = termination_string;
-
 	// Make sure Windows has started network services
 	WSADATA lpWSAData;
 	int startup_result = WSAStartup(MAKEWORD(2, 2), &lpWSAData);
@@ -123,13 +119,7 @@ Connection ConnectionListener::wait_for_connection()
 	SOCKET client_ID = accept(listening_socket, (sockaddr*)&client_information, NULL);
 
 	// Return the newly generated connection
-	return Connection(client_ID, connection_termination_string);
-}
-
-void ConnectionListener::set_client_termination_string(std::string terminator)
-{
-	// Set the string that will be returned from receive() if a user has left the server/room
-	connection_termination_string = terminator;
+	return Connection(client_ID);
 }
 
 #pragma endregion

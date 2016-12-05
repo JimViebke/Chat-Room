@@ -46,8 +46,7 @@ namespace pipedat
 
 	private:
 		SOCKET con_socket;
-		Connection(SOCKET sock, std::string client_termination_string);
-		std::string termination_string;
+		Connection(SOCKET sock);
 
 	public:
 		ConnectionID get_id() const { return con_socket; }
@@ -66,13 +65,11 @@ namespace pipedat
 	{
 	private:
 		SOCKET listening_socket;
-		std::string connection_termination_string;
 
 	public:
-		ConnectionListener(const unsigned &port, const SocketType &type, const Protocol &proto, const std::string &termination_string = "");
-		ConnectionListener(const unsigned &port, const std::string &termination_string = "");
+		ConnectionListener(const unsigned &port, const SocketType &type, const Protocol &proto);
+		ConnectionListener(const unsigned &port);
 		Connection wait_for_connection();
-		void set_client_termination_string(std::string terminator);
 	};
 
 }
