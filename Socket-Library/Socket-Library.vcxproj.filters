@@ -18,15 +18,15 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="socket-lib.hpp">
+    <ClInclude Include="..\applib-dist\include\exception.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="exception.hpp">
+    <ClInclude Include="..\applib-dist\include\socket-lib.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="socket-lib.cpp">
+    <ClCompile Include="..\applib-dist\include\socket-lib.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
