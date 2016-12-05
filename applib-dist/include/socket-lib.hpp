@@ -50,7 +50,7 @@ namespace pipedat
 		std::string termination_string;
 
 	public:
-		ConnectionID get_connection_id() { return con_socket; }
+		ConnectionID get_id() const { return con_socket; }
 
 		void send(std::string message) const;
 		std::string receive() const;
