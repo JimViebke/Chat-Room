@@ -5,6 +5,11 @@
 #include <mutex>
 #include <queue>
 
+/*
+Jim Viebke
+A basic thread-safe wrapper around a std::queue
+*/
+
 namespace threadsafe
 {
 	template<typename T>
