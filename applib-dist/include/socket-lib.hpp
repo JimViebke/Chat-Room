@@ -26,10 +26,10 @@ namespace pipedat
 	// Encapsulate the windows socket types inside our own class
 	enum SocketType
 	{
-		STREAM =	SOCK_STREAM,
-		DGRAM =		SOCK_DGRAM,
-		RAW =		SOCK_RAW,
-		RDM =		SOCK_RDM,
+		STREAM = SOCK_STREAM,
+		DGRAM = SOCK_DGRAM,
+		RAW = SOCK_RAW,
+		RDM = SOCK_RDM,
 		SEQPACKET = SOCK_SEQPACKET
 	};
 
@@ -47,6 +47,10 @@ namespace pipedat
 	private:
 		SOCKET con_socket;
 		Connection(SOCKET sock);
+
+		// delete copy-constructors
+		Connection(const Connection &) = delete;
+		Connection & operator=(const Connection &) = delete;
 
 	public:
 		ConnectionID get_id() const { return con_socket; }
