@@ -19,6 +19,7 @@
 #include "exception.hpp"
 
 #include <string>
+#include <memory>
 
 namespace pipedat
 {
@@ -39,10 +40,16 @@ namespace pipedat
 	// Encapsulate the windows SOCKET inside our library
 	using ConnectionID = SOCKET;
 
+	class Connection;
+
+	using connection_ptr = std::shared_ptr<Connection>;
+
 	// This object is used to store a connection between two computers
 	class Connection
 	{
 		friend class ConnectionListener;
+		friend class std::shared_ptr<Connection>;
+		friend class std::_Ref_count_obj<Connection>;
 
 	private:
 		SOCKET con_socket;
@@ -73,7 +80,7 @@ namespace pipedat
 	public:
 		ConnectionListener(const unsigned &port, const SocketType &type, const Protocol &proto);
 		ConnectionListener(const unsigned &port);
-		Connection wait_for_connection();
+		connection_ptr wait_for_connection();
 	};
 
 }

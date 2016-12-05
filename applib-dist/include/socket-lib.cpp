@@ -109,7 +109,7 @@ ConnectionListener::ConnectionListener(const unsigned &port, const SocketType &t
 	int listen_result = listen(listening_socket, 3);
 }
 
-Connection ConnectionListener::wait_for_connection()
+connection_ptr ConnectionListener::wait_for_connection()
 {
 	// Initialize the client information that will come in once a user joins the server
 	sockaddr_in client_information;
@@ -119,7 +119,7 @@ Connection ConnectionListener::wait_for_connection()
 	SOCKET client_ID = accept(listening_socket, (sockaddr*)&client_information, NULL);
 
 	// Return the newly generated connection
-	return Connection(client_ID);
+	return std::make_shared<Connection>(client_ID);
 }
 
 #pragma endregion
