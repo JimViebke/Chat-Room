@@ -2,6 +2,7 @@
 #include "client.h"
 
 #include <thread>
+#include <iostream>
 
 Client::Client(const std::string & ip, const unsigned & port)
 {
@@ -22,7 +23,15 @@ Client::Client(const std::string & ip, const unsigned & port)
 	Console_Framework::set_cursor_visibility(true);
 	Console_Framework::set_cursor_position(HEIGHT - 2, 3);
 
-	connection = std::make_unique<pipedat::Connection>(ip, port);
+	try
+	{
+		connection = std::make_unique<pipedat::Connection>(ip, port);
+	}
+	catch (std::exception & ex)
+	{
+		this->display->add(ex.what());
+		std::cin.ignore();
+	}
 }
 
 void Client::run()
