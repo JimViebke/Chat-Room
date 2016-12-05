@@ -42,7 +42,7 @@ void Client::run()
 	for (;;)
 	{
 		// get the list of events that have occurred
-		const Console_Framework::event_list events = Console_Framework::get_events();		
+		const Console_Framework::event_list events = Console_Framework::get_events();
 
 		// for each event
 		for (const Console_Framework::event_ptr & event : events)
@@ -85,10 +85,21 @@ void Client::run()
 
 void Client::receive()
 {
-	for (;;)
+	try
 	{
-		const std::string message = connection->receive();
-		std::lock_guard<std::mutex> lock(display_mutex);
-		display->add(message);
+		for (;;)
+		{
+			const std::string message = connection->receive();
+			std::lock_guard<std::mutex> lock(display_mutex);
+			display->add(message);
+		}
+	}
+	catch (pipedat::disgraceful_disconnect_exception & dde)
+	{
+		display->add("Caught disgraceful_disconnect_exception on connection->receive(). Error message: [" + std::string(dde.what()) + "].");
+	}
+	catch (std::exception & ex)
+	{
+		display->add("Caught std::exception connection->receive(). Error message: [" + std::string(ex.what()) + "].");
 	}
 }
