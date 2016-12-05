@@ -54,9 +54,9 @@ Connection::Connection(const unsigned &port, const SocketType &type, const Proto
 		return;
 	}
 
-	const SOCKET listening_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	con_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
-	if (listening_socket == INVALID_SOCKET)
+	if (con_socket == INVALID_SOCKET)
 	{
 		std::cout << "Server failed to start. Reason: " << WSAGetLastError() << std::endl;
 		return;
@@ -69,10 +69,10 @@ Connection::Connection(const unsigned &port, const SocketType &type, const Proto
 	name.sin_addr.S_un.S_addr = 0; // open port on all network interfaces
 
 	// Associate our port information with our port
-	bind(listening_socket, reinterpret_cast<sockaddr*>(&name), sizeof(sockaddr_in));
+	bind(con_socket, reinterpret_cast<sockaddr*>(&name), sizeof(sockaddr_in));
 
 	// Open the port for clients to connect, maintaining a backlog of up to 3 waiting connections
-	int listen_result = listen(listening_socket, 3);
+	int listen_result = listen(con_socket, 3);
 }
 
 void Connection::send(std::string message)
@@ -91,7 +91,7 @@ std::string Connection::receive()
 
 ConnectionListener::ConnectionListener(const unsigned &port, const SocketType &type, const Protocol &proto)
 {
-
+	Connection::Connection(port, type, proto);
 }
 
 Connection ConnectionListener::wait_for_connection()

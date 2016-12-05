@@ -1,7 +1,6 @@
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
-
 #if !defined(GUARD_SOCKLIB_HEADER)
 #define GUARD_SOCKLIB_HEADER
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
 
 #if defined(_DEBUG) && defined(_DLL)
 #pragma comment (lib, "socklib-mt-gd.lib")
@@ -40,7 +39,7 @@ namespace pipedat
 	// This object is used to store a connection between two computers
 	class Connection
 	{
-		friend ConnectionListener;
+		friend class ConnectionListener;
 
 	private:
 		SOCKET con_socket;
