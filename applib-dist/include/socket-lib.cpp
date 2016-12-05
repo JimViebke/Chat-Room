@@ -62,7 +62,7 @@ std::string Connection::receive() const
 		if (data_read == 0)
 			return "";
 		else if (data_read == -1)
-			throw new disgraceful_disconnect_exception("");
+			throw disgraceful_disconnect_exception("data_read is -1");
 
 		std::stringstream ss;
 		for (int i = 0; i < data_read; ++i)
