@@ -1,3 +1,5 @@
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+
 #if !defined(GUARD_SOCKLIB_HEADER)
 #define GUARD_SOCKLIB_HEADER
 
@@ -38,6 +40,8 @@ namespace pipedat
 	// This object is used to store a connection between two computers
 	class Connection
 	{
+		friend ConnectionListener;
+
 	private:
 		SOCKET con_socket;
 		Connection(const unsigned &port, const SocketType &type, const Protocol &proto);
@@ -54,8 +58,6 @@ namespace pipedat
 	class ConnectionListener
 	{
 	public:
-		friend Connection;
-
 		ConnectionListener(const unsigned &port, const SocketType &type, const Protocol &proto);
 		Connection wait_for_connection();
 	};
