@@ -49,13 +49,10 @@ void Client::run()
 				if (key_event->enter_pressed())
 				{
 					// read the message
-					const std::string message = text_box->get_contents();
-					
-					// clear the textbox
-					text_box->clear();
+					const std::string message = text_box->take_contents();
 
 					// add the message to the sender's screen (better than having the server send it back)
-					display->add(message);
+					display->add(user_name + ": " + message);
 
 					// send the message
 

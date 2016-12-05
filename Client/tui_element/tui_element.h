@@ -29,7 +29,7 @@ public:
 
 	void add_char(const char & character);
 	void backspace();
-	std::string get_contents() const;
+	std::string take_contents();
 	void clear();
 
 private:

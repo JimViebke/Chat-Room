@@ -31,9 +31,11 @@ void Text_Box::backspace()
 	if (data.size() > 0) data.erase(--data.cend());
 	render();
 }
-std::string Text_Box::get_contents() const
+std::string Text_Box::take_contents()
 {
-	return data;
+	std::string s(std::move(data));
+	clear();
+	return s;
 }
 void Text_Box::clear()
 {
