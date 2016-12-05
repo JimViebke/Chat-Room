@@ -41,38 +41,9 @@ Connection::Connection(const std::string &ip_address, const unsigned &port, cons
 	}
 }
 
-Connection::Connection(const unsigned &port, const SocketType &type, const Protocol &proto)
+Connection::Connection(SOCKET sock)
 {
-	// Make sure Windows has started network services
-	WSADATA lpWSAData;
-	int startup_result = WSAStartup(MAKEWORD(2, 2), &lpWSAData);
-
-	// Check the startup_result
-	if (startup_result != 0)
-	{
-		throw connection_exception("WSAStartup failed: " + startup_result);
-		return;
-	}
-
-	con_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-
-	if (con_socket == INVALID_SOCKET)
-	{
-		std::cout << "Server failed to start. Reason: " << WSAGetLastError() << std::endl;
-		return;
-	}
-
-	sockaddr_in name;
-	memset(&name, 0, sizeof(sockaddr_in));
-	name.sin_family = AF_INET;
-	name.sin_port = htons(port);
-	name.sin_addr.S_un.S_addr = 0; // open port on all network interfaces
-
-	// Associate our port information with our port
-	bind(con_socket, reinterpret_cast<sockaddr*>(&name), sizeof(sockaddr_in));
-
-	// Open the port for clients to connect, maintaining a backlog of up to 3 waiting connections
-	int listen_result = listen(con_socket, 3);
+	con_socket = sock;
 }
 
 void Connection::send(std::string message)
@@ -91,12 +62,49 @@ std::string Connection::receive()
 
 ConnectionListener::ConnectionListener(const unsigned &port, const SocketType &type, const Protocol &proto)
 {
-	Connection::Connection(port, type, proto);
+	// Make sure Windows has started network services
+	WSADATA lpWSAData;
+	int startup_result = WSAStartup(MAKEWORD(2, 2), &lpWSAData);
+
+	// Check the startup_result
+	if (startup_result != 0)
+	{
+		throw connection_exception("WSAStartup failed: " + startup_result);
+		return;
+	}
+
+	listening_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+	if (listening_socket == INVALID_SOCKET)
+	{
+		std::cout << "Server failed to start. Reason: " << WSAGetLastError() << std::endl;
+		return;
+	}
+
+	sockaddr_in name;
+	memset(&name, 0, sizeof(sockaddr_in));
+	name.sin_family = AF_INET;
+	name.sin_port = htons(port);
+	name.sin_addr.S_un.S_addr = 0; // open port on all network interfaces
+
+								   // Associate our port information with our port
+	bind(listening_socket, reinterpret_cast<sockaddr*>(&name), sizeof(sockaddr_in));
+
+	// Open the port for clients to connect, maintaining a backlog of up to 3 waiting connections
+	int listen_result = listen(listening_socket, 3);
 }
 
 Connection ConnectionListener::wait_for_connection()
 {
+	// Initialize the client information that will come in once a user joins the server
+	sockaddr_in client_information;
+	memset(&client_information, 0, sizeof(sockaddr_in));
 
+	// Get the new socket that the user has joined on
+	SOCKET client_ID = accept(listening_socket, (sockaddr*)&client_information, NULL);
+
+	// Return the newly generated connection
+	return Connection(client_ID);
 }
 
 #pragma endregion

@@ -43,7 +43,7 @@ namespace pipedat
 
 	private:
 		SOCKET con_socket;
-		Connection(const unsigned &port, const SocketType &type, const Protocol &proto);
+		Connection(SOCKET sock);
 
 	public:
 		void send(std::string message);
@@ -56,6 +56,8 @@ namespace pipedat
 	// This object is used to create a connection object for a server
 	class ConnectionListener
 	{
+	private:
+		SOCKET listening_socket;
 	public:
 		ConnectionListener(const unsigned &port, const SocketType &type, const Protocol &proto);
 		Connection wait_for_connection();
