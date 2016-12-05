@@ -1,27 +1,27 @@
-
 #include "client.h"
+#include "constants.h"
 
 #include <thread>
 #include <iostream>
 
-Client::Client(const std::string & ip, const unsigned & port)
+Client::Client(const unsigned &height, const unsigned &width, const std::string & ip, const unsigned & port)
 {
 	// configure the console
-	Console_Framework::setup(HEIGHT, WIDTH, "Chat Room");
+	Console_Framework::setup(height, width, "Chat Room");
 
 	// draw the blue box
-	Console_Framework::draw_box(HEIGHT - 3, 0, 3, WIDTH, UI_BACKGROUND);
+	Console_Framework::draw_box(height - 3, 0, 3, width, Constants::UI_BACKGROUND);
 
 	// draw the prompt
-	Console_Framework::draw_char(HEIGHT - 2, 1, '>', TEXT_COLOR);
+	Console_Framework::draw_char(height - 2, 1, '>', Constants::TEXT_COLOR);
 
 	// create our TUI elements
-	text_box = std::make_unique<Text_Box>(HEIGHT - 2, 3, WIDTH - 4, UI_TEXT_COLOR);
-	display = std::make_unique<Scrollable_Text_Display>(1, 1, HEIGHT - 4, WIDTH - 2);
+	text_box = std::make_unique<Text_Box>(height - 2, 3, width - 4, Constants::UI_TEXT_COLOR);
+	display = std::make_unique<Scrollable_Text_Display>(1, 1, height - 4, width - 2);
 
 	// start the cursor in the textbox
 	Console_Framework::set_cursor_visibility(true);
-	Console_Framework::set_cursor_position(HEIGHT - 2, 3);
+	Console_Framework::set_cursor_position(height - 2, 3);
 
 	try
 	{
@@ -42,7 +42,7 @@ void Client::run()
 	for (;;)
 	{
 		// get the list of events that have occurred
-		const Console_Framework::event_list events = Console_Framework::get_events();
+		const Console_Framework::event_list events = Console_Framework::get_events();		
 
 		// for each event
 		for (const Console_Framework::event_ptr & event : events)

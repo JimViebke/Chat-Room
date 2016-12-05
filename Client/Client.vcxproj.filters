@@ -24,6 +24,9 @@
     <ClCompile Include="tui_element\tui_element.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="connnection_window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="client.h">
@@ -33,6 +36,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="console_framework.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="connection_window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="constants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

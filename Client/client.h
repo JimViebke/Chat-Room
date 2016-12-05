@@ -13,12 +13,6 @@
 class Client
 {
 private:
-	const unsigned HEIGHT = 50, WIDTH = 100;
-	const Console_Framework::color_type TEXT_COLOR = Console_Framework::Color::foreground_white | Console_Framework::Color::background_blue;
-
-	const Console_Framework::color_type UI_BACKGROUND = Console_Framework::Color::background_blue;
-	const Console_Framework::color_type UI_TEXT_COLOR = Console_Framework::Color::black | Console_Framework::Color::background_white;
-
 	std::string user_name = "User";
 
 	std::unique_ptr<Text_Box> text_box;
@@ -28,7 +22,7 @@ private:
 	std::unique_ptr<pipedat::Connection> connection;
 
 public:
-	Client(const std::string & ip, const unsigned & port);
+	Client(const unsigned &height, const unsigned &width, const std::string & ip, const unsigned & port);
 
 	void run();
 	void receive();

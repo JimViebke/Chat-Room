@@ -297,12 +297,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="client.cpp" />
+    <ClCompile Include="connnection_window.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="tui_element\tui_element.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="client.h" />
+    <ClInclude Include="connection_window.h" />
     <ClInclude Include="console_framework.h" />
+    <ClInclude Include="constants.h" />
     <ClInclude Include="tui_element\tui_element.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
