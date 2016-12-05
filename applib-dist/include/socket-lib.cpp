@@ -1,5 +1,6 @@
 #include "socket-lib.hpp"
 #include <iostream>
+#include <sstream>
 using namespace pipedat;
 
 #pragma region Connection Functions
@@ -17,10 +18,7 @@ Connection::Connection(const std::string &ip_address, const unsigned &port, cons
 
 	// Check the startup_result
 	if (startup_result != 0)
-	{
 		throw connection_exception("WSAStartup failed: " + startup_result);
-		return;
-	}
 
 	// Create the socket
 	con_socket = socket(AF_INET, type, proto);
@@ -35,14 +33,15 @@ Connection::Connection(const std::string &ip_address, const unsigned &port, cons
 
 	if (res == SOCKET_ERROR)
 	{
-		throw socket_exception("Error on socket bind: " + WSAGetLastError());
 		closesocket(con_socket);
 		WSACleanup();
+		throw socket_exception("Error on socket bind: " + WSAGetLastError());
 	}
 }
 
-Connection::Connection(SOCKET sock)
+Connection::Connection(SOCKET sock, std::string client_termination_string)
 {
+	termination_string = client_termination_string;
 	con_socket = sock;
 }
 
@@ -53,39 +52,59 @@ void Connection::send(std::string message) const
 
 std::string Connection::receive() const
 {
-	return "";
+	char input[1024];
+
+	for (;;)
+	{
+		// Execution pauses inside of recv until the user sends data
+		int data_read = recv(con_socket, input, 1024, 0);
+
+		// Check for a graceful disconnect OR a less graceful disconnect
+		if (data_read == 0)
+			return termination_string;
+		else if (data_read == -1)
+			throw new disgraceful_disconnect_exception("");
+
+		std::stringstream ss;
+		for (int i = 0; i < data_read; ++i)
+			ss << input[i];
+
+		return ss.str();
+	}
 }
 
 #pragma endregion
 
 #pragma region ConnectionListener Functions
 
-ConnectionListener::ConnectionListener(const unsigned &port, const SocketType &type, const Protocol &proto)
+ConnectionListener::ConnectionListener(const unsigned &port, const std::string &termination_string = "")
 {
+	ConnectionListener::ConnectionListener(port, SocketType::STREAM, Protocol::IPPROTO_TCP, termination_string);
+}
+
+ConnectionListener::ConnectionListener(const unsigned &port, const SocketType &type, const Protocol &proto, const std::string &termination_string = "")
+{
+	// Immediately default the termination string to an empty string. The user can use set_client_termination_string() to set a different termination string.
+	connection_termination_string = termination_string;
+
 	// Make sure Windows has started network services
 	WSADATA lpWSAData;
 	int startup_result = WSAStartup(MAKEWORD(2, 2), &lpWSAData);
 
 	// Check the startup_result
 	if (startup_result != 0)
-	{
 		throw connection_exception("WSAStartup failed: " + startup_result);
-		return;
-	}
 
-	listening_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	listening_socket = socket(AF_INET, type, proto);
 
 	if (listening_socket == INVALID_SOCKET)
-	{
-		std::cout << "Server failed to start. Reason: " << WSAGetLastError() << std::endl;
-		return;
-	}
+		throw listen_exception("Failed to listen on port. Reason: " + WSAGetLastError());
 
 	sockaddr_in name;
 	memset(&name, 0, sizeof(sockaddr_in));
 	name.sin_family = AF_INET;
 	name.sin_port = htons(port);
-	name.sin_addr.S_un.S_addr = 0; // open port on all network interfaces
+	name.sin_addr.S_un.S_addr = 0; // Open port on all network interfaces
 
 								   // Associate our port information with our port
 	bind(listening_socket, reinterpret_cast<sockaddr*>(&name), sizeof(sockaddr_in));
@@ -104,7 +123,13 @@ Connection ConnectionListener::wait_for_connection()
 	SOCKET client_ID = accept(listening_socket, (sockaddr*)&client_information, NULL);
 
 	// Return the newly generated connection
-	return Connection(client_ID);
+	return Connection(client_ID, connection_termination_string);
+}
+
+void ConnectionListener::set_client_termination_string(std::string terminator)
+{
+	// Set the string that will be returned from receive() if a user has left the server/room
+	connection_termination_string = terminator;
 }
 
 #pragma endregion
