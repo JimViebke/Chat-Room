@@ -4,8 +4,8 @@
 #include <mutex>
 
 // custom libraries
-#include "console_framework.h"
 #include <socket-lib.hpp>
+#include "console_framework.h"
 
 // local headers
 #include "tui_element\tui_element.h"
@@ -28,7 +28,7 @@ private:
 	std::unique_ptr<pipedat::Connection> connection;
 
 public:
-	Client(const std::string ip, const unsigned & port);
+	Client(const std::string & ip, const unsigned & port);
 
 	void run();
 	void receive();

@@ -5,7 +5,7 @@
 
 int main()
 {
-	Client client;
+	Client client("fake.ip", 8050);
 	client.run();
 
 	std::cin.ignore();

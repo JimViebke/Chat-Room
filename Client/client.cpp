@@ -1,9 +1,9 @@
 
-#include <thread>
-
 #include "client.h"
 
-Client::Client(const std::string ip, const unsigned & port)
+#include <thread>
+
+Client::Client(const std::string & ip, const unsigned & port)
 {
 	// configure the console
 	Console_Framework::setup(HEIGHT, WIDTH, "Chat Room");
