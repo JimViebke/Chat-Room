@@ -46,7 +46,7 @@ Connection::Connection(SOCKET sock)
 
 void Connection::send(std::string message) const
 {
-
+	::send(con_socket, message.c_str(), message.size(), 0);
 }
 
 std::string Connection::receive() const
