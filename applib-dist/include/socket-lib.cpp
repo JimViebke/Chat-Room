@@ -5,9 +5,9 @@ using namespace pipedat;
 
 #pragma region Connection Functions
 
-Connection::Connection(const std::string &ip_address, const unsigned &port)
+Connection::Connection(const std::string &ip_address, const unsigned &port) : Connection(ip_address, port, SocketType::STREAM, Protocol::IPPROTO_TCP)
 {
-	Connection::Connection(ip_address, port, SocketType::STREAM, Protocol::IPPROTO_TCP);
+	// Connection::Connection(ip_address, port, SocketType::STREAM, Protocol::IPPROTO_TCP);
 }
 
 Connection::Connection(const std::string &ip_address, const unsigned &port, const SocketType &type, const Protocol &proto)
