@@ -1,7 +1,9 @@
 
+#include <thread>
+
 #include "client.h"
 
-Client::Client()
+Client::Client(const std::string ip, const unsigned & port)
 {
 	// configure the console
 	Console_Framework::setup(HEIGHT, WIDTH, "Chat Room");
@@ -15,15 +17,18 @@ Client::Client()
 	// create our TUI elements
 	text_box = std::make_unique<Text_Box>(HEIGHT - 2, 3, WIDTH - 4, UI_TEXT_COLOR);
 	display = std::make_unique<Scrollable_Text_Display>(1, 1, HEIGHT - 4, WIDTH - 2);
-	
+
 	// start the cursor in the textbox
 	Console_Framework::set_cursor_visibility(true);
 	Console_Framework::set_cursor_position(HEIGHT - 2, 3);
+
+	connection = std::make_unique<pipedat::Connection>(ip, port);
 }
 
 void Client::run()
 {
-	// start the inbound thread here
+	// start the receiving thread here
+	std::thread(&Client::receive, this).detach();
 
 	for (;;)
 	{
@@ -36,11 +41,12 @@ void Client::run()
 			// if the event is a done event type
 			if (const Console_Framework::done_event_ptr done_event = Console_Framework::convert_to<Console_Framework::Done_Event>(event))
 			{
-				return; // somehow kill the other thread
+				return; // somehow kill the other thread (or just let it die)
 			}
 			else if (const Console_Framework::scroll_event_ptr scroll_event = Console_Framework::convert_to<Console_Framework::Scroll_Event>(event))
 			{
 				// scroll and re-render the viewer
+				std::lock_guard<std::mutex> lock(display_mutex);
 				this->display->scroll(scroll_event->get_direction());
 			}
 			else if (const Console_Framework::key_event_ptr key_event = Console_Framework::convert_to<Console_Framework::Key_Event>(event))
@@ -51,11 +57,12 @@ void Client::run()
 					// read the message
 					const std::string message = text_box->take_contents();
 
-					// add the message to the sender's screen (better than having the server send it back)
+					// add the message to the sender's screen (better than having the server send it back)		
+					std::lock_guard<std::mutex> lock(display_mutex);
 					display->add(user_name + ": " + message);
 
 					// send the message
-
+					connection->send(message);
 				}
 				else // all other key events
 				{
@@ -64,5 +71,15 @@ void Client::run()
 				}
 			}
 		}
+	}
+}
+
+void Client::receive()
+{
+	for (;;)
+	{
+		const std::string message = connection->receive();
+		std::lock_guard<std::mutex> lock(display_mutex);
+		display->add(message);
 	}
 }

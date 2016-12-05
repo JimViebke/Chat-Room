@@ -1,6 +1,13 @@
 #pragma once
 
+// standard libraries
+#include <mutex>
+
+// custom libraries
 #include "console_framework.h"
+#include <socket-lib.hpp>
+
+// local headers
 #include "tui_element\tui_element.h"
 
 class Client
@@ -16,10 +23,13 @@ private:
 
 	std::unique_ptr<Text_Box> text_box;
 	std::unique_ptr<Scrollable_Text_Display> display;
+	std::mutex display_mutex;
+
+	std::unique_ptr<pipedat::Connection> connection;
 
 public:
-	Client();
+	Client(const std::string ip, const unsigned & port);
 
 	void run();
-	
+	void receive();
 };
