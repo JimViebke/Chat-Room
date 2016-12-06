@@ -5,10 +5,7 @@ using namespace pipedat;
 
 #pragma region Connection Functions
 
-Connection::Connection(const std::string &ip_address, const unsigned &port) : Connection(ip_address, port, SocketType::STREAM, Protocol::IPPROTO_TCP)
-{
-	// Connection::Connection(ip_address, port, SocketType::STREAM, Protocol::IPPROTO_TCP);
-}
+Connection::Connection(const std::string &ip_address, const unsigned &port) : Connection(ip_address, port, SocketType::STREAM, Protocol::IPPROTO_TCP) { }
 
 Connection::Connection(const std::string &ip_address, const unsigned &port, const SocketType &type, const Protocol &proto)
 {
@@ -29,7 +26,7 @@ Connection::Connection(const std::string &ip_address, const unsigned &port, cons
 	serverAddress.sin_port = htons(port);
 	serverAddress.sin_addr.s_addr = inet_addr(ip_address.c_str());
 
-	int res = bind(con_socket, reinterpret_cast<sockaddr*>(&serverAddress), sizeof(sockaddr_in));
+	int res = connect(con_socket, reinterpret_cast<sockaddr*>(&serverAddress), sizeof(sockaddr_in));
 
 	if (res == SOCKET_ERROR)
 	{
