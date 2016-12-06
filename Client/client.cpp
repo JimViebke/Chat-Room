@@ -66,6 +66,12 @@ void Client::run()
 					// read the message
 					const std::string message = text_box->take_contents();
 
+					if (message == "/exit")
+					{
+						connection->send("");
+						return;
+					}
+
 					// add the message to the sender's screen (better than having the server send it back)		
 					std::lock_guard<std::mutex> lock(display_mutex);
 					display->add(user_name + ": " + message);

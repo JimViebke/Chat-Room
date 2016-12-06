@@ -111,10 +111,15 @@ void Server::receive(connection_ptr connection)
 		if (data.size() == 0) {	
 			// Lock both user and room mutex since we will be modifying both
 			std::lock_guard<std::mutex> user_lock(users_mutex);
-			std::lock_guard<std::mutex> room_lock(room_mutex);
-
+			
 			// Get the user and room iterators
 			auto user_it = users.find(connection->get_id());
+
+			// Tell the other users that this user has left the room
+			send_to_room(user_it->second.room_name, user_it->second.user_name + " has left the room.", user_it->second.connection->get_id());
+
+			// Lock the rooms mutex as we need to remove the user from this room
+			std::lock_guard<std::mutex> room_lock(room_mutex);
 			auto room_it = rooms.find(user_it->second.room_name);
 	
 			// Erase the user from the room
@@ -147,29 +152,32 @@ void Server::send()
 
 void Server::handle_commands(connection_ptr connection, const std::vector<std::string> & commands)
 {
+	std::string c1 = commands[0];
+	std::string c2 = commands[1];
+
 	// the caller locks the users_mutex
 	auto user_it = users.find(connection->get_id());
 
-	if (commands[0] == "/name")
+	if (c1 == "/name")
 	{
 		if (commands.size() < 2) return;
 
 		for (const auto & user : users)
 		{
-			if (user.second.user_name == commands[1])
+			if (user.second.user_name == c2)
 			{
-				output_queue.put(Message(connection->get_id(), commands[1] + " is already in use."));
+				output_queue.put(Message(connection->get_id(), c2 + " is already in use."));
 				return;
 			}
 		}
 
 		// tell the room that the user has changed their name
-		send_to_room(user_it->second.room_name, user_it->second.user_name + " has changed their name to " + commands[1], user_it->second.connection->get_id());
+		send_to_room(user_it->second.room_name, user_it->second.user_name + " has changed their name to " + c2, user_it->second.connection->get_id());
 
 		// Change the user's name
-		user_it->second.user_name = commands[1];
+		user_it->second.user_name = c2;
 	}
-	else if (commands[0] == "/join")
+	else if (c1 == "/join")
 	{
 		if (commands.size() < 2) return;
 
@@ -182,7 +190,6 @@ void Server::handle_commands(connection_ptr connection, const std::vector<std::s
 			std::lock_guard<std::mutex> room_lock(room_mutex);
 
 			// Get the user and room iterators
-			auto user_it = users.find(connection->get_id());
 			auto room_it = rooms.find(user_it->second.room_name);
 
 			// Erase the user from the room
@@ -192,25 +199,21 @@ void Server::handle_commands(connection_ptr connection, const std::vector<std::s
 			if (room_it->second.size() == 0)
 				rooms.erase(room_it);
 
-			if (rooms.find(commands[1]) == rooms.cend()) // if the room hasn't been created yet
-				rooms[commands[1]] = std::set<pipedat::ConnectionID>();
+			if (rooms.find(c2) == rooms.cend()) // if the room hasn't been created yet
+				rooms[c2] = std::set<pipedat::ConnectionID>();
 
 			// Add the user to the new room
-			rooms[commands[1]].insert(connection->get_id());
+			rooms[c2].insert(connection->get_id());
 		}
 
 		// Move this user to the new room
-		user_it->second.room_name = commands[1];
+		user_it->second.room_name = c2;
 		
 
 		// Tell the other users that this user has left the room
 		send_to_room(user_it->second.room_name, user_it->second.user_name + " has joined the room.", user_it->second.connection->get_id());
 	}
-	else if (commands[0] == "/exit")
-	{
-
-	}
-	else if (commands[0] == "/help")
+	else if (c1 == "/help")
 	{
 
 	}
