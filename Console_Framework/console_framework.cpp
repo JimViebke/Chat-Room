@@ -10,7 +10,7 @@ namespace // anonymous namespace
 {
 	bool done = false;
 
-	void control_handler(DWORD ctrlType); // forward-declaring
+	int control_handler(DWORD ctrlType); // forward-declaring
 }
 
 // console framework data
@@ -262,16 +262,20 @@ unsigned Console_Framework::get_width()
 
 namespace // anonymous namespace
 {
-	void control_handler(DWORD ctrlType)
+	int control_handler(DWORD ctrlType)
 	{
 		switch (ctrlType) {
-		case CTRL_C_EVENT:
-		{
-			// restore the console's previous settings
-			Console_Framework::restore_console();
-			// set the done flag to true
-			done = true;
+			case CTRL_C_EVENT:
+			{
+				// set the done flag to true
+				done = true;
+
+				// restore the console's previous settings
+				Console_Framework::restore_console();
+
+				return 1;
+			}
 		}
-		}
+		return 0;
 	}
 }

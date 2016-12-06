@@ -1,7 +1,10 @@
 #include "connection_window.h"
 
-ConnectionWindow::ConnectionWindow(const unsigned &height, const unsigned &width, const std::string &error)
+ConnectionWindow::ConnectionWindow(const unsigned &height, const unsigned &width)
 {
+	ConnectionWindow::height = height;
+	ConnectionWindow::width = height;
+
 	unsigned ystart = 3;
 	unsigned padding = 2;
 
@@ -20,12 +23,6 @@ ConnectionWindow::ConnectionWindow(const unsigned &height, const unsigned &width
 
 	// Create our TUI elements
 	text_box = std::make_unique<Text_Box>((height - ystart), (label.size() + padding), (width - label.size() - padding - 2), Constants::UI_TEXT_COLOR);
-
-	// If there was an error, display that error
-	for (unsigned i = 0; i < error.size(); ++i)
-	{
-		Console_Framework::draw_char(height - 1, (i + 1), error[i], Constants::TEXT_COLOR);
-	}
 
 	// Start the cursor in the textbox
 	Console_Framework::set_cursor_visibility(true);
@@ -48,7 +45,28 @@ std::string ConnectionWindow::run()
 				if (key_event->enter_pressed())
 				{
 					// read the message
-					return text_box->take_contents();
+					std::string error, ip_address;
+					unsigned port;
+					std::string ip_and_port = text_box->take_contents();
+
+					if (ip_and_port.find("::") == std::string::npos)
+					{
+						error = "error: No '::' separator between ipaddress and port.";
+						continue;
+					}
+
+					// If there was an error, display that error
+					if (error.size() != 0)
+					{
+						for (unsigned i = 0; i < error.size(); ++i)
+						{
+							Console_Framework::draw_char(height - 1, (i + 1), error[i], Constants::TEXT_COLOR);
+						}
+					}
+					else
+					{
+						return ip_and_port;
+					}
 				}
 				else // all other key events
 				{

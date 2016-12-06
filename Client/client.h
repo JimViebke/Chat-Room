@@ -23,6 +23,7 @@ private:
 
 public:
 	Client(const unsigned &height, const unsigned &width, const std::string & ip, const unsigned & port);
+	~Client() { Console_Framework::restore_console(); }
 
 	void run();
 	void receive();

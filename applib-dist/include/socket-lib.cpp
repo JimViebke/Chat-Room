@@ -32,7 +32,7 @@ Connection::Connection(const std::string &ip_address, const unsigned &port, cons
 	{
 		closesocket(con_socket);
 		WSACleanup();
-		throw socket_exception("Error on socket bind: " + WSAGetLastError());
+		throw socket_exception("Error on socket connect: " + WSAGetLastError());
 	}
 }
 
@@ -73,10 +73,7 @@ std::string Connection::receive() const
 
 #pragma region ConnectionListener Functions
 
-ConnectionListener::ConnectionListener(const unsigned &port)
-{
-	ConnectionListener::ConnectionListener(port, SocketType::STREAM, Protocol::IPPROTO_TCP);
-}
+ConnectionListener::ConnectionListener(const unsigned &port) : ConnectionListener(port, SocketType::STREAM, Protocol::IPPROTO_TCP) {}
 
 ConnectionListener::ConnectionListener(const unsigned &port, const SocketType &type, const Protocol &proto)
 {

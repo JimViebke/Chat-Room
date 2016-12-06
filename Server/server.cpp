@@ -2,6 +2,7 @@
 #include "server.h"
 
 #include <sstream>
+#include <iostream>
 #include <iterator>
 
 using namespace pipedat;
@@ -44,6 +45,7 @@ void Server::run()
 		std::string room_name;
 		{
 			std::lock_guard<std::mutex> lock(users_mutex);
+			message.data = users[message.id].user_name +  ": " + message.data;
 			room_name = users[message.id].room_name;
 		}
 
@@ -64,7 +66,13 @@ void Server::listen_for_new_users()
 		// save the user
 		{
 			std::lock_guard<std::mutex> lock(users_mutex);
-			users[connection->get_id()] = User_Info(connection, "User " + connection->get_id(), "main");
+
+			// Create a stringstream for username because it will try to add an unsigned (connection->get_id()) to a char array if we do not specify username as a string.
+			std::stringstream ss;
+			ss << "User " << connection->get_id();
+
+			// Create the user info object.
+			users[connection->get_id()] = User_Info(connection, ss.str(), "main");
 		}
 
 		// add the user to the main room
@@ -85,10 +93,43 @@ void Server::receive(connection_ptr connection)
 {
 	for (;;)
 	{
-		const std::string data = connection->receive();
+		std::string data;
 
-		if (data.size() == 0) return; // 0 indicates connection termination
+		try
+		{
+			data = connection->receive();
+		}
+		catch (pipedat::disgraceful_disconnect_exception & dde)
+		{
+			std::cout << "Caught disgraceful_disconnect_exception on connection->receive(). Error message: [" + std::string(dde.what()) + "].";
+		}
+		catch (std::exception & ex)
+		{
+			std::cout << "Caught std::exception connection->receive(). Error message: [" + std::string(ex.what()) + "].";
+		}
+	
+		if (data.size() == 0) {	
+			// Lock both user and room mutex since we will be modifying both
+			std::lock_guard<std::mutex> user_lock(users_mutex);
+			std::lock_guard<std::mutex> room_lock(room_mutex);
 
+			// Get the user and room iterators
+			auto user_it = users.find(connection->get_id());
+			auto room_it = rooms.find(user_it->second.room_name);
+	
+			// Erase the user from the room
+			room_it->second.erase((room_it->second.find(connection->get_id())));
+		
+			// If the room has no one left in it, destroy that room
+			if (room_it->second.size() == 0)
+				rooms.erase(room_it);
+	
+			// Since the user has left the server, remove them from the server's list of users
+			users.erase(user_it);
+	
+			return;
+		}
+	
 		input_queue.put(Message(connection->get_id(), data));
 	}
 }
@@ -107,8 +148,7 @@ void Server::send()
 void Server::handle_commands(connection_ptr connection, const std::vector<std::string> & commands)
 {
 	// the caller locks the users_mutex
-
-	auto user_it = users[connection->get_id()];
+	auto user_it = users.find(connection->get_id());
 
 	if (commands[0] == "/name")
 	{
@@ -124,14 +164,47 @@ void Server::handle_commands(connection_ptr connection, const std::vector<std::s
 		}
 
 		// tell the room that the user has changed their name
-		send_to_room(user_it.room_name, user_it.user_name + " has changed their name to " + commands[1], user_it.connection->get_id());
+		send_to_room(user_it->second.room_name, user_it->second.user_name + " has changed their name to " + commands[1], user_it->second.connection->get_id());
 
-		// change the user's name
-		user_it.user_name = commands[1];
+		// Change the user's name
+		user_it->second.user_name = commands[1];
 	}
 	else if (commands[0] == "/join")
 	{
+		if (commands.size() < 2) return;
 
+		// Tell the other users that this user has left the room
+		send_to_room(user_it->second.room_name, user_it->second.user_name + " has left the room.", user_it->second.connection->get_id());
+
+		// Remove the user from the current room and add them to the new room
+		{
+			// Lock both user and room mutex since we will be modifying both
+			std::lock_guard<std::mutex> room_lock(room_mutex);
+
+			// Get the user and room iterators
+			auto user_it = users.find(connection->get_id());
+			auto room_it = rooms.find(user_it->second.room_name);
+
+			// Erase the user from the room
+			room_it->second.erase((room_it->second.find(connection->get_id())));
+
+			// If the room has no one left in it, destroy that room
+			if (room_it->second.size() == 0)
+				rooms.erase(room_it);
+
+			if (rooms.find(commands[1]) == rooms.cend()) // if the room hasn't been created yet
+				rooms[commands[1]] = std::set<pipedat::ConnectionID>();
+
+			// Add the user to the new room
+			rooms[commands[1]].insert(connection->get_id());
+		}
+
+		// Move this user to the new room
+		user_it->second.room_name = commands[1];
+		
+
+		// Tell the other users that this user has left the room
+		send_to_room(user_it->second.room_name, user_it->second.user_name + " has joined the room.", user_it->second.connection->get_id());
 	}
 	else if (commands[0] == "/exit")
 	{

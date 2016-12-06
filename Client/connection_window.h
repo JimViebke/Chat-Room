@@ -7,9 +7,11 @@ class ConnectionWindow
 {
 private:
 	std::unique_ptr<Text_Box> text_box;
+	unsigned height, width;
 
 public:
-	ConnectionWindow(const unsigned &height, const unsigned &width, const std::string &error);
+	ConnectionWindow(const unsigned &height, const unsigned &width);
+	~ConnectionWindow() { Console_Framework::restore_console(); }
 
 	std::string run();
 };
