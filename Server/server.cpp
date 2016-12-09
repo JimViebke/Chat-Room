@@ -59,6 +59,8 @@ void Server::listen_for_new_users()
 {
 	const pipedat::ConnectionListener connection_listener(8050, SocketType::STREAM, Protocol::IPPROTO_TCP);
 
+	std::cout << "Listening for new users on port 8050.\n";
+
 	for (;;)
 	{
 		// get the next new connection
