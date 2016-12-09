@@ -52,7 +52,11 @@ std::string ConnectionWindow::run()
 		// for each event
 		for (const Console_Framework::event_ptr & event : events)
 		{
-			if (const Console_Framework::key_event_ptr key_event = Console_Framework::convert_to<Console_Framework::Key_Event>(event))
+			if (const Console_Framework::done_event_ptr done = Console_Framework::convert_to<Console_Framework::Done_Event>(event))
+			{
+				return "";
+			}
+			else if (const Console_Framework::key_event_ptr key_event = Console_Framework::convert_to<Console_Framework::Key_Event>(event))
 			{
 				// if the enter key was pressed
 				if (key_event->enter_pressed())
