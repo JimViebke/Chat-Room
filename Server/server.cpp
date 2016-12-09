@@ -106,33 +106,14 @@ void Server::receive(connection_ptr connection)
 			std::cout << "Caught std::exception connection->receive(). Error message: [" + std::string(ex.what()) + "].";
 		}
 
-		if (data.size() == 0) {
-			// Lock both user and room mutex since we will be modifying both
-			std::lock_guard<std::mutex> user_lock(users_mutex);
-
-			// Get the user and room iterators
-			auto user_it = users.find(connection->get_id());
-
-			// Tell the other users that this user has left the room
-			send_to_room(user_it->second.room_name, user_it->second.user_name + " has left the room.", user_it->second.connection->get_id());
-
-			// Lock the rooms mutex as we need to remove the user from this room
-			std::lock_guard<std::mutex> room_lock(room_mutex);
-			auto room_it = rooms.find(user_it->second.room_name);
-
-			// Erase the user from the room
-			room_it->second.erase((room_it->second.find(connection->get_id())));
-
-			// If the room has no one left in it, destroy that room
-			if (room_it->second.size() == 0)
-				rooms.erase(room_it);
-
-			// Since the user has left the server, remove them from the server's list of users
-			users.erase(user_it);
-
+		// in the event of a disconnect or failure, an empty message signals the server to clean up after the user
+		if (data.size() == 0)
+		{			
+			remove_user(connection);
 			return;
 		}
 
+		// save the user's message
 		input_queue.put(Message(connection->get_id(), data));
 	}
 }
@@ -239,4 +220,30 @@ void Server::send_to_room(const std::string & room_name, const std::string & dat
 void Server::send_to_user(const ConnectionID &user, const std::string &data)
 {
 	output_queue.put(Message(user, data));
+}
+
+void Server::remove_user(connection_ptr connection)
+{
+	// Lock both user and room mutex since we will be modifying both
+	std::lock_guard<std::mutex> user_lock(users_mutex);
+
+	// Get the user and room iterators
+	auto user_it = users.find(connection->get_id());
+
+	// Tell the other users that this user has left the room
+	send_to_room(user_it->second.room_name, user_it->second.user_name + " has left the room.", user_it->second.connection->get_id());
+
+	// Lock the rooms mutex as we need to remove the user from this room
+	std::lock_guard<std::mutex> room_lock(room_mutex);
+	auto room_it = rooms.find(user_it->second.room_name);
+
+	// Erase the user from the room
+	room_it->second.erase((room_it->second.find(connection->get_id())));
+
+	// If the room has no one left in it, destroy that room
+	if (room_it->second.size() == 0)
+		rooms.erase(room_it);
+
+	// Since the user has left the server, remove them from the server's list of users
+	users.erase(user_it);
 }

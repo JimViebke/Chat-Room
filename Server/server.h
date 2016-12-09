@@ -61,4 +61,6 @@ private:
 	void send_to_room(const std::string & room_name, const std::string & data, const pipedat::ConnectionID & exclude);
 
 	void send_to_user(const pipedat::ConnectionID &user, const std::string &data);
+
+	void remove_user(connection_ptr connection);
 };
