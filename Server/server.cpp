@@ -143,7 +143,7 @@ void Server::handle_commands(const connection_ptr connection, const std::vector<
 	{
 		// Get the new username
 		std::string new_user_name;
-		for(unsigned i = 1; i < command.size(); ++i)
+		for(unsigned i = 1; i < commands.size(); ++i)
 			new_user_name += commands[i] + " ";
 
 		// Remove the last space at the end of the name
