@@ -143,6 +143,8 @@ void Server::send()
 	{
 		// get the next message on the queue
 		const Message message = output_queue.get();
+		// lock the user mutex
+		std::lock_guard<std::mutex> lock(users_mutex);
 		// send the message
 		users[message.id].connection->send(message.data);
 	}
