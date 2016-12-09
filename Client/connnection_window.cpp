@@ -1,9 +1,22 @@
 #include "connection_window.h"
 
+#include <string>
+#include <sstream>
+#include <vector>
+
+void split(const std::string &s, char delim, std::vector<std::string> &elems) {
+	std::stringstream ss;
+	ss.str(s);
+	std::string item;
+	while (std::getline(ss, item, delim)) {
+		elems.push_back(item);
+	}
+}
+
 ConnectionWindow::ConnectionWindow(const unsigned &height, const unsigned &width)
 {
 	ConnectionWindow::height = height;
-	ConnectionWindow::width = height;
+	ConnectionWindow::width = width;
 
 	unsigned ystart = 3;
 	unsigned padding = 2;
@@ -45,28 +58,67 @@ std::string ConnectionWindow::run()
 				if (key_event->enter_pressed())
 				{
 					// read the message
-					std::string error, ip_address;
-					unsigned port;
+					std::string error;
 					std::string ip_and_port = text_box->take_contents();
 
+					// Verify the ip address
 					if (ip_and_port.find("::") == std::string::npos)
-					{
-						error = "error: No '::' separator between ipaddress and port.";
-						continue;
-					}
-
-					// If there was an error, display that error
-					if (error.size() != 0)
-					{
-						for (unsigned i = 0; i < error.size(); ++i)
-						{
-							Console_Framework::draw_char(height - 1, (i + 1), error[i], Constants::TEXT_COLOR);
-						}
-					}
+						error = "error: Entered string was not in format ipaddress::port.";
 					else
 					{
-						return ip_and_port;
+						// Get the ipaddress and port number
+						std::string ip_address = ip_and_port.substr(0, ip_and_port.find("::"));
+						std::string s_port = ip_and_port.substr(ip_and_port.find("::") + 2, ip_and_port.size());
+
+						try
+						{
+							// This will thorw an error if the port number is not a number
+							unsigned uport = stoi(s_port);
+
+							try
+							{
+								std::vector<std::string> pieces;
+								split(ip_address, '.', pieces);
+
+								if (pieces.size() != 4)
+									throw std::exception();
+
+								unsigned piece;
+								for (std::string p : pieces)
+								{
+									// The following will throw an exception to be caught if pieces cannot be put into an integer
+									piece = stoi(p);
+
+									// A single piece should not be over 255
+									if (piece > 255)
+										throw std::exception();
+								}
+							}
+							catch (std::exception ex)
+							{
+								error = "error: Invalid ipaddress.";
+							}
+						}
+						catch (std::exception ex)
+						{
+							error = "error: Invalid port number.";
+						}
 					}
+
+					// If there was an error, display that error. Otherwise return the ip and port address
+					if (error.size() != 0)
+					{
+						// Clear the previous error if there is one
+						for (unsigned i = 0; i < width; ++i)
+							Console_Framework::draw_char(height - 1, (i + 1), ' ', Constants::TEXT_COLOR);
+
+						// Write the new error to console
+						for (unsigned i = 0; i < error.size(); ++i)
+							Console_Framework::draw_char(height - 1, (i + 1), error[i], Constants::TEXT_COLOR);
+					}
+					else
+						return ip_and_port;
+
 				}
 				else // all other key events
 				{
