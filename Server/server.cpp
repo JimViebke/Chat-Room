@@ -57,7 +57,7 @@ void Server::run()
 
 void Server::listen_for_new_users()
 {
-	pipedat::ConnectionListener connection_listener(8050, SocketType::STREAM, Protocol::IPPROTO_TCP);
+	const pipedat::ConnectionListener connection_listener(8050, SocketType::STREAM, Protocol::IPPROTO_TCP);
 
 	for (;;)
 	{
@@ -88,7 +88,7 @@ void Server::listen_for_new_users()
 
 }
 
-void Server::receive(connection_ptr connection)
+void Server::receive(const connection_ptr connection)
 {
 	for (;;)
 	{
@@ -132,16 +132,16 @@ void Server::send()
 	}
 }
 
-void Server::handle_commands(connection_ptr connection, const std::vector<std::string> & commands)
+void Server::handle_commands(const connection_ptr connection, const std::vector<std::string> & commands)
 {
-	std::string command = commands[0];
+	const std::string command = commands[0];
 
 	// the caller locks the users_mutex
-	auto user_it = users.find(connection->get_id());
+	const auto user_it = users.find(connection->get_id());
 
 	if (command == "/name")
 	{
-		std::string new_user_name = commands[1];
+		const std::string new_user_name = commands[1];
 
 		if (commands.size() < 2) return;
 
@@ -164,7 +164,7 @@ void Server::handle_commands(connection_ptr connection, const std::vector<std::s
 	}
 	else if (command == "/join")
 	{
-		std::string new_room_name = commands[1];
+		const std::string new_room_name = commands[1];
 
 		if (commands.size() < 2) return;
 
@@ -223,20 +223,20 @@ void Server::send_to_user(const ConnectionID &user, const std::string &data)
 	output_queue.put(Message(user, data));
 }
 
-void Server::remove_user(connection_ptr connection)
+void Server::remove_user(const connection_ptr connection)
 {
 	// Lock both user and room mutex since we will be modifying both
 	std::lock_guard<std::mutex> user_lock(users_mutex);
 
 	// Get the user and room iterators
-	auto user_it = users.find(connection->get_id());
+	const auto user_it = users.find(connection->get_id());
 
 	// Tell the other users that this user has left the room
 	send_to_room(user_it->second.room_name, user_it->second.user_name + " has left the room.", user_it->second.connection->get_id());
 
 	// Lock the rooms mutex as we need to remove the user from this room
 	std::lock_guard<std::mutex> room_lock(room_mutex);
-	auto room_it = rooms.find(user_it->second.room_name);
+	const auto room_it = rooms.find(user_it->second.room_name);
 
 	// Erase the user from the room
 	room_it->second.erase((room_it->second.find(connection->get_id())));

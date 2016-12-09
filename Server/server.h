@@ -52,15 +52,15 @@ public:
 private:
 	void listen_for_new_users();
 
-	void receive(connection_ptr connection);
+	void receive(const connection_ptr connection);
 
 	void send();
 
-	void handle_commands(connection_ptr connection, const std::vector<std::string> & commands);
+	void handle_commands(const connection_ptr connection, const std::vector<std::string> & commands);
 
 	void send_to_room(const std::string & room_name, const std::string & data, const pipedat::ConnectionID & exclude);
 
 	void send_to_user(const pipedat::ConnectionID &user, const std::string &data);
 
-	void remove_user(connection_ptr connection);
+	void remove_user(const connection_ptr connection);
 };
