@@ -119,12 +119,12 @@ void Client::receive()
 			display->add(message);
 		}
 	}
-	catch (pipedat::disgraceful_disconnect_exception & dde)
+	catch (pipedat::disgraceful_disconnect_exception)
 	{
-		display->add("Unfortunately the server has stopped running.");
+		display->add("The server has been shutdown by the host.");
 	}
-	catch (std::exception & ex)
+	catch (std::exception)
 	{
-		display->add("Caught std::exception connection->receive(). Error message: [" + std::string(ex.what()) + "].");
+		display->add("The server has unexpectedly shutdown.");
 	}
 }
