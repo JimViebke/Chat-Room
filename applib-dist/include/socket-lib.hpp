@@ -75,7 +75,7 @@ namespace pipedat
 	public:
 		ConnectionID get_id() const { return con_socket; }
 
-		void send(std::string message) const;
+		void send(const std::string & message) const;
 		std::string receive() const;
 
 		Connection(const std::string &ip_address, const unsigned &port);

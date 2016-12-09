@@ -35,7 +35,7 @@ Connection::Connection(const std::string &ip_address, const unsigned &port, cons
 	serverAddress.sin_port = htons(port);
 	serverAddress.sin_addr.s_addr = inet_addr(ip_address.c_str());
 
-	int res = connect(con_socket, reinterpret_cast<sockaddr*>(&serverAddress), sizeof(sockaddr_in));
+	const int res = connect(con_socket, reinterpret_cast<sockaddr*>(&serverAddress), sizeof(sockaddr_in));
 
 	if (res == SOCKET_ERROR)
 	{
@@ -53,7 +53,7 @@ Connection::Connection(SOCKET sock)
 	con_socket = sock;
 }
 
-void Connection::send(std::string message) const
+void Connection::send(const std::string & message) const
 {
 	::send(con_socket, message.c_str(), message.size(), 0);
 }
