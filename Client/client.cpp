@@ -75,8 +75,8 @@ void Client::run()
 					const std::istream_iterator<std::string> begin(ss);
 					std::vector<std::string> strings(begin, std::istream_iterator<std::string>());
 
-					if (strings.size() > 0 && strings[0] == "/name")
-						user_name = message.substr(5, message.size());
+					if (strings.size() > 1 && strings[0] == "/name")
+						user_name = message.substr(6, message.size());
 
 					display->add(user_name + ": " + message);
 
@@ -121,7 +121,7 @@ void Client::receive()
 	}
 	catch (pipedat::disgraceful_disconnect_exception & dde)
 	{
-		display->add("Caught disgraceful_disconnect_exception on connection->receive(). Error message: [" + std::string(dde.what()) + "].");
+		display->add("Unfortunately the server has stopped running.");
 	}
 	catch (std::exception & ex)
 	{
