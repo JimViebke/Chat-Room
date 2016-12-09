@@ -9,6 +9,7 @@
 
 #include "threadsafe_queue.h"
 
+// a simple class to bundle an ID with a string
 class Message
 {
 public:
@@ -42,6 +43,7 @@ private:
 	std::map<std::string, std::set<pipedat::ConnectionID>> rooms;
 	std::mutex room_mutex;
 
+	// a queue for inbound and outbound messages
 	threadsafe::queue<Message> input_queue, output_queue;
 
 public:
