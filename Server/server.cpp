@@ -59,6 +59,8 @@ void Server::listen_for_new_users()
 {
 	const pipedat::ConnectionListener connection_listener(8050, SocketType::STREAM, Protocol::IPPROTO_TCP);
 
+	std::cout << "Listening for new users on port 8050.\n";
+
 	for (;;)
 	{
 		// get the next new connection
@@ -202,8 +204,12 @@ void Server::handle_commands(const connection_ptr connection, const std::vector<
 		// Move this user to the new room
 		user_it->second.room_name = new_room_name;
 		
-		// Tell the other users that this user has left the room
+		// Tell the other users that this user has joined the room
 		send_to_room(user_it->second.room_name, user_it->second.user_name + " has joined the room.", user_it->second.connection->get_id());
+
+		// Tell the user that they have joined the room. We can't do this client-side, because a client
+		// has no guarantees of the functionality of the server.
+		send_to_user(user_it->first, "You have joined " + new_room_name + ".");
 	}
 }
 
