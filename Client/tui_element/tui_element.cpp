@@ -91,7 +91,7 @@ void Scrollable_Text_Display::add(const std::string & add)
 	if (data.size() > _height)
 	{
 		// scroll to see the newest message
-		_scroll_height = data.size() - _height;
+		_scroll_height = (unsigned)data.size() - _height;
 	}
 
 	render();

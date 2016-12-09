@@ -35,11 +35,11 @@ ConnectionWindow::ConnectionWindow(const unsigned &height, const unsigned &width
 	}
 
 	// Create our TUI elements
-	text_box = std::make_unique<Text_Box>((height - ystart), (label.size() + padding), (width - label.size() - padding - 2), Constants::UI_TEXT_COLOR);
+	text_box = std::make_unique<Text_Box>(unsigned(height - ystart), unsigned(label.size() + padding), unsigned(width - label.size() - padding - 2), Constants::UI_TEXT_COLOR);
 
 	// Start the cursor in the textbox
 	Console_Framework::set_cursor_visibility(true);
-	Console_Framework::set_cursor_position((height - ystart), (label.size() + padding));
+	Console_Framework::set_cursor_position(unsigned(height - ystart), unsigned(label.size() + padding));
 }
 
 std::string ConnectionWindow::run()
