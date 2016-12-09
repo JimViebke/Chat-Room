@@ -40,7 +40,6 @@ Connection::Connection(const std::string &ip_address, const unsigned &port, cons
 	if (res == SOCKET_ERROR)
 	{
 		closesocket(con_socket);
-		WSACleanup();
 		throw socket_exception("Error on socket connect: " + WSAGetLastError());
 	}
 }
