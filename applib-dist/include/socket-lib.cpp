@@ -3,19 +3,28 @@
 #include <sstream>
 using namespace pipedat;
 
+WSA_Wrapper::WSA_Wrapper()
+{
+	WSADATA wsaData;
+	const int startup_result = WSAStartup(MAKEWORD(2, 2), &wsaData);
+
+	if (startup_result != 0)
+		throw connection_exception("WSAStartup failed: " + startup_result);
+}
+
+WSA_Wrapper::~WSA_Wrapper()
+{
+	WSACleanup();
+}
+
 #pragma region Connection Functions
 
 Connection::Connection(const std::string &ip_address, const unsigned &port) : Connection(ip_address, port, SocketType::STREAM, Protocol::IPPROTO_TCP) { }
 
 Connection::Connection(const std::string &ip_address, const unsigned &port, const SocketType &type, const Protocol &proto)
 {
-	// Make sure Windows has started network services
-	WSADATA wsaData;
-	int startup_result = WSAStartup(MAKEWORD(2, 2), &wsaData);
-
-	// Check the startup_result
-	if (startup_result != 0)
-		throw connection_exception("WSAStartup failed: " + startup_result);
+	// ensure WSA has started (destroys automatically)
+	WSA_Wrapper::startup();
 
 	// Create the socket
 	con_socket = socket(AF_INET, type, proto);
@@ -38,6 +47,9 @@ Connection::Connection(const std::string &ip_address, const unsigned &port, cons
 
 Connection::Connection(SOCKET sock)
 {
+	// ensure WSA has started (destroys automatically)
+	WSA_Wrapper::startup();
+
 	con_socket = sock;
 }
 
@@ -77,13 +89,8 @@ ConnectionListener::ConnectionListener(const unsigned &port) : ConnectionListene
 
 ConnectionListener::ConnectionListener(const unsigned &port, const SocketType &type, const Protocol &proto)
 {
-	// Make sure Windows has started network services
-	WSADATA lpWSAData;
-	int startup_result = WSAStartup(MAKEWORD(2, 2), &lpWSAData);
-
-	// Check the startup_result
-	if (startup_result != 0)
-		throw connection_exception("WSAStartup failed: " + startup_result);
+	// ensure WSA has started (destroys automatically)
+	WSA_Wrapper::startup();
 
 	listening_socket = socket(AF_INET, type, proto);
 

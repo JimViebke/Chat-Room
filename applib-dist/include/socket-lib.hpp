@@ -23,6 +23,19 @@
 
 namespace pipedat
 {
+	// a thin wrapper around WSAStartup and WSACleanup to ensure each is called one time
+	class WSA_Wrapper
+	{
+	private:
+		WSA_Wrapper();
+
+	public:
+		static void startup()
+		{
+			static WSA_Wrapper wrapper;
+		}
+		~WSA_Wrapper();
+	};
 
 	// Encapsulate the windows socket types inside our own class
 	enum SocketType
