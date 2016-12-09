@@ -202,7 +202,7 @@ void Server::handle_commands(const connection_ptr connection, const std::vector<
 		// Move this user to the new room
 		user_it->second.room_name = new_room_name;
 		
-		// Tell the other users that this user has left the room
+		// Tell the other users that this user has joined the room
 		send_to_room(user_it->second.room_name, user_it->second.user_name + " has joined the room.", user_it->second.connection->get_id());
 	}
 }
