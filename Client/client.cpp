@@ -3,6 +3,8 @@
 
 #include <thread>
 #include <iostream>
+#include <sstream>
+#include <iterator>
 
 Client::Client(const unsigned &height, const unsigned &width, const std::string & ip, const unsigned & port)
 {
@@ -68,6 +70,14 @@ void Client::run()
 
 					// add the message to the sender's screen (better than having the server send it back)		
 					std::lock_guard<std::mutex> lock(display_mutex);
+
+					std::stringstream ss(message);
+					const std::istream_iterator<std::string> begin(ss);
+					std::vector<std::string> strings(begin, std::istream_iterator<std::string>());
+
+					if (strings.size() > 0 && strings[0] == "/name")
+						user_name = message.substr(5, message.size());
+
 					display->add(user_name + ": " + message);
 
 					if (message == "/exit")

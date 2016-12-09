@@ -13,7 +13,7 @@
 class Client
 {
 private:
-	std::string user_name = "User";
+	std::string user_name = "You";
 
 	std::unique_ptr<Text_Box> text_box;
 	std::unique_ptr<Scrollable_Text_Display> display;
