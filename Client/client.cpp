@@ -85,16 +85,6 @@ void Client::run()
 						connection->send("");
 						return;
 					}
-					else if (message == "/help")
-					{
-						display->add("Use one of the following commands:");
-						display->add("    up arrow key - Used to scroll up through previous messages in the chat room.");
-						display->add("    down arrow key - Used to scroll down through messages in the chat room.");
-						display->add("    /name | /n - Used in conjunction with a new name to change your name.");
-						display->add("    /join | /j - Used in conjunction with a room name to join a new room.");
-						display->add("    /whisper | /w - Use this command in conjunction with the name of the person you'd like to whisper and a message.");
-						display->add("    /exit | /e - Used to exit the application.");
-					}
 
 					// send the message
 					connection->send(message);

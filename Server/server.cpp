@@ -252,6 +252,18 @@ void Server::handle_commands(const connection_ptr connection, const std::vector<
 		else
 			send_to_user(user_it->first, "You must specify a user to whisper to.");
 	}
+	else if (command == "/help" || command == "/h")
+	{
+		std::string help_message = "help:Use one of the following commands:";
+		help_message += "help:up arrow key - Used to scroll up through previous messages in the chat room.";
+		help_message += "help:down arrow key - Used to scroll down through messages in the chat room.";
+		help_message += "help:/name | /n - Used in conjunction with a new name to change your name.";
+		help_message += "help:/join | /j - Used in conjunction with a room name to join a new room.";
+		help_message += "help:/whisper | /w - Use this command in conjunction with the name of the person you'd like to whisper and a message.";
+		help_message += "help:/exit | /e - Used to exit the application.";
+
+		send_to_user(user_it->first, help_message);
+	}
 	else
 	{
 		send_to_user(user_it->first, commands[0] + "is not a recognized command. Use /help to view a list of commands.");
