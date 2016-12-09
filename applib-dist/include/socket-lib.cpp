@@ -103,7 +103,7 @@ ConnectionListener::ConnectionListener(const unsigned &port, const SocketType &t
 	int listen_result = listen(listening_socket, 3);
 }
 
-connection_ptr ConnectionListener::wait_for_connection()
+connection_ptr ConnectionListener::wait_for_connection() const
 {
 	// Initialize the client information that will come in once a user joins the server
 	sockaddr_in client_information;

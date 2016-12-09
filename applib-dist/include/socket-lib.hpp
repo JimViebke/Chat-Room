@@ -80,7 +80,7 @@ namespace pipedat
 	public:
 		ConnectionListener(const unsigned &port, const SocketType &type, const Protocol &proto);
 		ConnectionListener(const unsigned &port);
-		connection_ptr wait_for_connection();
+		connection_ptr wait_for_connection() const;
 	};
 
 }
