@@ -152,35 +152,37 @@ void Server::send()
 
 void Server::handle_commands(connection_ptr connection, const std::vector<std::string> & commands)
 {
-	std::string c1 = commands[0];
+	std::string command = commands[0];
 
 	// the caller locks the users_mutex
 	auto user_it = users.find(connection->get_id());
 
-	if (c1 == "/name")
+	if (command == "/name")
 	{
-		std::string c2 = commands[1];
+		std::string new_user_name = commands[1];
 
 		if (commands.size() < 2) return;
 
 		for (const auto & user : users)
 		{
-			if (user.second.user_name == c2)
+			if (user.second.user_name == new_user_name)
 			{
-				send_to_user(connection->get_id(), c2 + " is already in use.");
+				send_to_user(connection->get_id(), new_user_name + " is already in use.");
 				return;
 			}
 		}
 
 		// tell the room that the user has changed their name
-		send_to_room(user_it->second.room_name, user_it->second.user_name + " has changed their name to " + c2, user_it->second.connection->get_id());
+		send_to_room(user_it->second.room_name, user_it->second.user_name + " has changed their name to " + new_user_name, user_it->second.connection->get_id());
+
+		send_to_user(user_it->second.connection->get_id(), "You have changed your name to " + new_user_name);
 
 		// Change the user's name
-		user_it->second.user_name = c2;
+		user_it->second.user_name = new_user_name;
 	}
-	else if (c1 == "/join")
+	else if (command == "/join")
 	{
-		std::string c2 = commands[1];
+		std::string new_room_name = commands[1];
 
 		if (commands.size() < 2) return;
 
@@ -202,17 +204,16 @@ void Server::handle_commands(connection_ptr connection, const std::vector<std::s
 			if (room_it->second.size() == 0)
 				rooms.erase(room_it);
 
-			if (rooms.find(c2) == rooms.cend()) // if the room hasn't been created yet
-				rooms[c2] = std::set<pipedat::ConnectionID>();
+			if (rooms.find(new_room_name) == rooms.cend()) // if the room hasn't been created yet
+				rooms[new_room_name] = std::set<pipedat::ConnectionID>();
 
 			// Add the user to the new room
-			rooms[c2].insert(connection->get_id());
+			rooms[new_room_name].insert(connection->get_id());
 		}
 
 		// Move this user to the new room
-		user_it->second.room_name = c2;
-
-
+		user_it->second.room_name = new_room_name;
+		
 		// Tell the other users that this user has left the room
 		send_to_room(user_it->second.room_name, user_it->second.user_name + " has joined the room.", user_it->second.connection->get_id());
 	}
