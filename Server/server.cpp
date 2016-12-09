@@ -204,6 +204,10 @@ void Server::handle_commands(const connection_ptr connection, const std::vector<
 		
 		// Tell the other users that this user has joined the room
 		send_to_room(user_it->second.room_name, user_it->second.user_name + " has joined the room.", user_it->second.connection->get_id());
+
+		// Tell the user that they have joined the room. We can't do this client-side, because a client
+		// has no guarantees of the functionality of the server.
+		send_to_user(user_it->first, "You have joined " + new_room_name + ".");
 	}
 }
 
