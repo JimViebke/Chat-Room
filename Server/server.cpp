@@ -153,20 +153,21 @@ void Server::send()
 void Server::handle_commands(connection_ptr connection, const std::vector<std::string> & commands)
 {
 	std::string c1 = commands[0];
-	std::string c2 = commands[1];
 
 	// the caller locks the users_mutex
 	auto user_it = users.find(connection->get_id());
 
 	if (c1 == "/name")
 	{
+		std::string c2 = commands[1];
+
 		if (commands.size() < 2) return;
 
 		for (const auto & user : users)
 		{
 			if (user.second.user_name == c2)
 			{
-				output_queue.put(Message(connection->get_id(), c2 + " is already in use."));
+				send_to_user(connection->get_id(), c2 + " is already in use.");
 				return;
 			}
 		}
@@ -179,6 +180,8 @@ void Server::handle_commands(connection_ptr connection, const std::vector<std::s
 	}
 	else if (c1 == "/join")
 	{
+		std::string c2 = commands[1];
+
 		if (commands.size() < 2) return;
 
 		// Tell the other users that this user has left the room
@@ -215,7 +218,10 @@ void Server::handle_commands(connection_ptr connection, const std::vector<std::s
 	}
 	else if (c1 == "/help")
 	{
-
+		send_to_user(user_it->first, "Use one of the following commands:");
+		send_to_user(user_it->first, "/name - used to change your name.");
+		send_to_user(user_it->first, "/join - used in conjunction with a room name to join a new room.");
+		send_to_user(user_it->first, "/exit - used to exit the application.");
 	}
 }
 
@@ -233,5 +239,10 @@ void Server::send_to_room(const std::string & room_name, const std::string & dat
 		// if the user is not the sender
 		if (user != exclude)
 			// send a new message
-			output_queue.put(Message(user, data));
+			send_to_user(user, data);
+}
+
+void Server::send_to_user(const ConnectionID &user, const std::string &data)
+{
+	output_queue.put(Message(user, data));
 }
