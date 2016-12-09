@@ -23,7 +23,7 @@ void Server::run()
 	for (;;)
 	{
 		// get the next message
-		Message message = input_queue.get();
+		const Message message = input_queue.get();
 
 		// check if the user has entered a special command
 		if (message.data[0] == '/')
@@ -40,17 +40,18 @@ void Server::run()
 
 			continue;
 		}
-
-		// get the user's room
+		
+		// prepend the username to the message and retrieve the user's room
+		std::string data;
 		std::string room_name;
 		{
 			std::lock_guard<std::mutex> lock(users_mutex);
-			message.data = users[message.id].user_name + ": " + message.data;
+			data = users[message.id].user_name + ": " + message.data;
 			room_name = users[message.id].room_name;
 		}
 
 		// forward their message to the room
-		send_to_room(room_name, message.data, message.id);
+		send_to_room(room_name, data, message.id);
 	}
 }
 
