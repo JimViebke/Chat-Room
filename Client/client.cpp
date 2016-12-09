@@ -66,15 +66,22 @@ void Client::run()
 					// read the message
 					const std::string message = text_box->take_contents();
 
+					// add the message to the sender's screen (better than having the server send it back)		
+					std::lock_guard<std::mutex> lock(display_mutex);
+					display->add(user_name + ": " + message);
+
 					if (message == "/exit")
 					{
 						connection->send("");
 						return;
 					}
-
-					// add the message to the sender's screen (better than having the server send it back)		
-					std::lock_guard<std::mutex> lock(display_mutex);
-					display->add(user_name + ": " + message);
+					else if (message == "/help")
+					{
+						display->add("Use one of the following commands:");
+						display->add("    /name - used in conjunction with a new name to change your name.");
+						display->add("    /join - used in conjunction with a room name to join a new room.");
+						display->add("    /exit - used to exit the application.");
+					}
 
 					// send the message
 					connection->send(message);

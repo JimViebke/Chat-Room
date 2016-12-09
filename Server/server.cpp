@@ -216,13 +216,6 @@ void Server::handle_commands(connection_ptr connection, const std::vector<std::s
 		// Tell the other users that this user has left the room
 		send_to_room(user_it->second.room_name, user_it->second.user_name + " has joined the room.", user_it->second.connection->get_id());
 	}
-	else if (c1 == "/help")
-	{
-		send_to_user(user_it->first, "Use one of the following commands:");
-		send_to_user(user_it->first, "/name - used to change your name.");
-		send_to_user(user_it->first, "/join - used in conjunction with a room name to join a new room.");
-		send_to_user(user_it->first, "/exit - used to exit the application.");
-	}
 }
 
 void Server::send_to_room(const std::string & room_name, const std::string & data, const ConnectionID & exclude)
