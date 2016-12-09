@@ -86,6 +86,14 @@ Scrollable_Text_Display::Scrollable_Text_Display(const unsigned & set_x, const u
 void Scrollable_Text_Display::add(const std::string & add)
 {
 	data.push_back(add);
+
+	// if text will render beneath the view
+	if (data.size() > _height)
+	{
+		// scroll to see the newest message
+		_scroll_height = data.size() - _height;
+	}
+
 	render();
 }
 void Scrollable_Text_Display::scroll(const Console_Framework::Scroll_Event::Direction & direction)
