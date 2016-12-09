@@ -63,15 +63,13 @@ void Server::listen_for_new_users()
 		// get the next new connection
 		connection_ptr connection = connection_listener.wait_for_connection();
 
-		// save the user
+		// build the username using a stringstreawm
+		std::stringstream ss;
+		ss << "User " << connection->get_id();
+
+		// add the user to the list of users
 		{
 			std::lock_guard<std::mutex> lock(users_mutex);
-
-			// Create a stringstream for username because it will try to add an unsigned (connection->get_id()) to a char array if we do not specify username as a string.
-			std::stringstream ss;
-			ss << "User " << connection->get_id();
-
-			// Create the user info object.
 			users[connection->get_id()] = User_Info(connection, ss.str(), "main");
 		}
 
