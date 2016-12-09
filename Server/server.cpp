@@ -147,7 +147,7 @@ void Server::handle_commands(const connection_ptr connection, const std::vector<
 	// the caller locks the users_mutex
 	const auto user_it = users.find(connection->get_id());
 
-	if (command == "/name")
+	if (command == "/name" || command == "/n")
 	{
 		// Get the new username
 		std::string new_user_name;
@@ -176,7 +176,7 @@ void Server::handle_commands(const connection_ptr connection, const std::vector<
 		// Change the user's name
 		user_it->second.user_name = new_user_name;
 	}
-	else if (command == "/join")
+	else if (command == "/join" || command == "/j")
 	{
 		const std::string new_room_name = commands[1];
 
@@ -216,6 +216,45 @@ void Server::handle_commands(const connection_ptr connection, const std::vector<
 		// Tell the user that they have joined the room. We can't do this client-side, because a client
 		// has no guarantees of the functionality of the server.
 		send_to_user(user_it->first, "You have joined " + new_room_name + ".");
+	}
+	else if (command == "/whisper" || command == "/w")
+	{
+		if (commands.size() > 1)
+		{
+			// Get the username of the receiver
+			std::string receiver = commands[1];
+
+			// Lock both room mutex as we are looking for users in the current room
+			std::lock_guard<std::mutex> room_lock(room_mutex);
+
+			bool user_exists = false;
+			for (auto user : users)
+			{
+				if (user.second.user_name == receiver)
+				{
+					std::string message;
+					for (unsigned i = 2; i < commands.size(); ++i)
+						message += commands[i] + " ";
+
+					// Remove the last space at the end of the message
+					message = message.substr(0, message.size() - 1);
+
+					send_to_user(user.second.connection->get_id(), (user_it->second.user_name + ": " + message));
+
+					user_exists = true;
+					break;
+				}
+			}
+
+			if (!user_exists)
+				send_to_user(user_it->first, "A user with username: " + receiver + " is not online.");
+		}
+		else
+			send_to_user(user_it->first, "You must specify a user to whisper to.");
+	}
+	else
+	{
+		send_to_user(user_it->first, commands[0] + "is not a recognized command. Use /help to view a list of commands.");
 	}
 }
 
