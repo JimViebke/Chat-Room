@@ -27,6 +27,8 @@ private:
 	std::atomic<bool> finished = false;
 	using connection_ptr = std::shared_ptr<pipedat::Connection>;
 
+	std::unique_ptr<pipedat::ConnectionListener> connection_listener;
+
 	class User_Info
 	{
 	public:

@@ -96,6 +96,8 @@ void Server::handle_events()
 			{
 				finished = true;
 
+				connection_listener->shut_down();
+
 				input_queue.quit();
 				output_queue.quit();
 
@@ -107,14 +109,14 @@ void Server::handle_events()
 
 void Server::listen_for_new_users()
 {
-	const pipedat::ConnectionListener connection_listener(8050, SocketType::STREAM, Protocol::IPPROTO_TCP);
+	connection_listener = std::make_unique<ConnectionListener>(8050, SocketType::STREAM, Protocol::IPPROTO_TCP);
 
 	std::cout << "Listening for new users on port 8050.\n";
 
 	for (;;)
 	{
 		// get the next new connection
-		connection_ptr connection = connection_listener.wait_for_connection();
+		connection_ptr connection = connection_listener->wait_for_connection();
 
 		// kill this thread if the connection listener fails
 		if (connection == nullptr)

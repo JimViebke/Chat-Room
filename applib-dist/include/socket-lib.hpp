@@ -89,12 +89,15 @@ namespace pipedat
 	class ConnectionListener
 	{
 	private:
+		bool socket_closed = false;
 		SOCKET listening_socket;
 
 	public:
 		ConnectionListener(const unsigned &port, const SocketType &type, const Protocol &proto);
 		ConnectionListener(const unsigned &port);
+		~ConnectionListener() { if (!socket_closed) { closesocket(listening_socket); } }
 		connection_ptr wait_for_connection() const;
+		void shut_down();
 	};
 
 }

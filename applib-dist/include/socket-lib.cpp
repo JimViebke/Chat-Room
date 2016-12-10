@@ -129,4 +129,10 @@ connection_ptr ConnectionListener::wait_for_connection() const
 	return std::make_shared<Connection>(client_ID);
 }
 
+void ConnectionListener::shut_down()
+{
+	socket_closed = true;
+	closesocket(listening_socket);
+}
+
 #pragma endregion
