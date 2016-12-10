@@ -43,7 +43,7 @@ void Server::run()
 				if (strings.size() > 0)
 				{
 					std::lock_guard<std::mutex> lock(users_mutex);
-					handle_commands(users[message.id].connection, strings);
+					handle_commands(users[message.id]->connection, strings);
 				}
 
 				continue;
@@ -54,8 +54,8 @@ void Server::run()
 			std::string room_name;
 			{
 				std::lock_guard<std::mutex> lock(users_mutex);
-				data = users[message.id].user_name + ": " + message.data;
-				room_name = users[message.id].room_name;
+				data = users[message.id]->user_name + ": " + message.data;
+				room_name = users[message.id]->room_name;
 			}
 
 			// forward their message to the room
@@ -67,8 +67,8 @@ void Server::run()
 		// terminate each connection
 		{
 			std::lock_guard<std::mutex> lock(users_mutex);
-			for (auto user : users)
-				user.second.connection->shut_down();
+			for (auto & user : users)
+				user.second->connection->shut_down();
 		}
 
 		// wait for the threads to exit
@@ -120,12 +120,12 @@ void Server::listen_for_new_users()
 		if (connection == nullptr)
 		{
 			// if the server is closing down, wait for child threads to detect it and close
-			if (finished)
-			{
-				std::lock_guard<std::mutex> lock(users_mutex);
-				for (auto user : users)
-					user.second.thread->join();
-			}
+			//if (finished)
+			//{
+			//	std::lock_guard<std::mutex> lock(users_mutex);
+			//	for (auto & user : users)
+			//		user.second->thread->join();
+			//}
 
 			return;
 		}
@@ -137,7 +137,7 @@ void Server::listen_for_new_users()
 		// add the user to the list of users
 		{
 			std::lock_guard<std::mutex> lock(users_mutex);
-			users[connection->get_id()] = User_Info(connection, ss.str(), "main");
+			users[connection->get_id()] = std::make_unique<User_Info>(connection, ss.str(), "main");
 		}
 
 		// add the user to the main room
@@ -151,16 +151,11 @@ void Server::listen_for_new_users()
 		// Notify the other users in the room
 		{
 			std::lock_guard<std::mutex> lock(users_mutex);
-			send_to_room("main", (C::INFO_FLAG + users[connection->get_id()].user_name + " has joined the room"), connection->get_id());
-		}
-
-		// save the thread in the user object
-		{
-			std::lock_guard<std::mutex> lock(users_mutex);
-			users[connection->get_id()].thread = std::make_shared<std::thread>(&Server::receive, this, connection);
+			send_to_room("main", (C::INFO_FLAG + users[connection->get_id()]->user_name + " has joined the room"), connection->get_id());
 		}
 
 		// start the user's receive thread
+		std::thread(&Server::receive, this, connection).detach();
 	}
 
 }
@@ -202,7 +197,7 @@ void Server::send()
 			// lock the user mutex
 			std::lock_guard<std::mutex> lock(users_mutex);
 			// send the message
-			users[message.id].connection->send(message.data);
+			users[message.id]->connection->send(message.data);
 		}
 	}
 	catch (threadsafe::queue<Message>::queue_quit)
@@ -232,7 +227,7 @@ void Server::handle_commands(const connection_ptr connection, const std::vector<
 
 		for (const auto & user : users)
 		{
-			if (user.second.user_name == commands[1])
+			if (user.second->user_name == commands[1])
 			{
 				send_to_user(connection->get_id(), (C::INFO_FLAG + commands[1] + " is already in use."));
 				return;
@@ -240,12 +235,12 @@ void Server::handle_commands(const connection_ptr connection, const std::vector<
 		}
 
 		// tell the room that the user has changed their name
-		send_to_room(user_it->second.room_name, (C::INFO_FLAG + user_it->second.user_name + " has changed their name to " + commands[1]), user_it->second.connection->get_id());
+		send_to_room(user_it->second->room_name, (C::INFO_FLAG + user_it->second->user_name + " has changed their name to " + commands[1]), user_it->second->connection->get_id());
 
-		send_to_user(user_it->second.connection->get_id(), (C::INFO_FLAG + "You have changed your name to " + commands[1]));
+		send_to_user(user_it->second->connection->get_id(), (C::INFO_FLAG + "You have changed your name to " + commands[1]));
 
 		// Change the user's name
-		user_it->second.user_name = commands[1];
+		user_it->second->user_name = commands[1];
 	}
 	else if (command == "/join" || command == "/j")
 	{
@@ -262,7 +257,7 @@ void Server::handle_commands(const connection_ptr connection, const std::vector<
 		const std::string new_room_name = commands[1];
 
 		// Tell the other users that this user has left the room
-		send_to_room(user_it->second.room_name, (C::INFO_FLAG + user_it->second.user_name + " has left the room."), user_it->second.connection->get_id());
+		send_to_room(user_it->second->room_name, (C::INFO_FLAG + user_it->second->user_name + " has left the room."), user_it->second->connection->get_id());
 
 		// Remove the user from the current room and add them to the new room
 		{
@@ -270,7 +265,7 @@ void Server::handle_commands(const connection_ptr connection, const std::vector<
 			std::lock_guard<std::mutex> room_lock(room_mutex);
 
 			// Get the user and room iterators
-			auto room_it = rooms.find(user_it->second.room_name);
+			auto room_it = rooms.find(user_it->second->room_name);
 
 			// Erase the user from the room
 			room_it->second.erase((room_it->second.find(connection->get_id())));
@@ -287,10 +282,10 @@ void Server::handle_commands(const connection_ptr connection, const std::vector<
 		}
 
 		// Move this user to the new room
-		user_it->second.room_name = new_room_name;
+		user_it->second->room_name = new_room_name;
 
 		// Tell the other users that this user has joined the room
-		send_to_room(user_it->second.room_name, (C::INFO_FLAG + user_it->second.user_name + " has joined the room."), user_it->second.connection->get_id());
+		send_to_room(user_it->second->room_name, (C::INFO_FLAG + user_it->second->user_name + " has joined the room."), user_it->second->connection->get_id());
 
 		// Tell the user that they have joined the room. We can't do this client-side, because a client
 		// has no guarantees of the functionality of the server.
@@ -307,9 +302,9 @@ void Server::handle_commands(const connection_ptr connection, const std::vector<
 			std::lock_guard<std::mutex> room_lock(room_mutex);
 
 			bool user_exists = false;
-			for (auto user : users)
+			for (auto & user : users)
 			{
-				if (user.second.user_name == receiver)
+				if (user.second->user_name == receiver)
 				{
 					std::string message;
 					for (unsigned i = 2; i < commands.size(); ++i)
@@ -318,7 +313,7 @@ void Server::handle_commands(const connection_ptr connection, const std::vector<
 					// Remove the last space at the end of the message
 					message = message.substr(0, message.size() - 1);
 
-					send_to_user(user.second.connection->get_id(), (C::WHISPER_FLAG + user_it->second.user_name + ": " + message));
+					send_to_user(user.second->connection->get_id(), (C::WHISPER_FLAG + user_it->second->user_name + ": " + message));
 
 					user_exists = true;
 					break;
@@ -380,11 +375,11 @@ void Server::remove_user(const connection_ptr connection)
 	const auto user_it = users.find(connection->get_id());
 
 	// Tell the other users that this user has left the room
-	send_to_room(user_it->second.room_name, (C::INFO_FLAG + user_it->second.user_name + " has left the room."), user_it->second.connection->get_id());
+	send_to_room(user_it->second->room_name, (C::INFO_FLAG + user_it->second->user_name + " has left the room."), user_it->second->connection->get_id());
 
 	// Lock the rooms mutex as we need to remove the user from this room
 	std::lock_guard<std::mutex> room_lock(room_mutex);
-	const auto room_it = rooms.find(user_it->second.room_name);
+	const auto room_it = rooms.find(user_it->second->room_name);
 
 	// Erase the user from the room
 	room_it->second.erase((room_it->second.find(connection->get_id())));

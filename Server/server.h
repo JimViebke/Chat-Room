@@ -31,17 +31,24 @@ private:
 
 	class User_Info
 	{
+	private:
+		User_Info(User_Info const&);
+		User_Info& operator=(User_Info const&);
 	public:
 		connection_ptr connection;
 		std::string user_name, room_name;
-		std::shared_ptr<std::thread> thread;
+		// std::shared_ptr<std::thread> thread;
 		User_Info() {}
 		User_Info(connection_ptr set_connection, const std::string & set_name, const std::string & set_room)
 			: connection(set_connection), user_name(set_name), room_name(set_room) {}
+		~User_Info()
+		{
+			// thread.reset();
+		}
 	};
 
 	// map a username to a Connection and a room name
-	std::map<pipedat::ConnectionID, User_Info> users;
+	std::map<pipedat::ConnectionID, std::unique_ptr<User_Info>> users;
 	std::mutex users_mutex;
 
 	// map a room to its users
