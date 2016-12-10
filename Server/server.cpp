@@ -68,7 +68,7 @@ void Server::listen_for_new_users()
 
 		// build the username using a stringstreawm
 		std::stringstream ss;
-		ss << "User " << connection->get_id();
+		ss << "User" << connection->get_id();
 
 		// add the user to the list of users
 		{
