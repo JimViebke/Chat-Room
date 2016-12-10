@@ -51,6 +51,7 @@ private:
 
 public:
 	Server(const unsigned &height, const unsigned &width);
+	~Server() { Console_Framework::restore_console(); }
 
 	void run();
 
