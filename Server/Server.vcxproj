@@ -301,9 +301,9 @@
     <ClCompile Include="server.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Client\threadsafe_queue.h" />
     <ClInclude Include="constants.h" />
     <ClInclude Include="server.h" />
+    <ClInclude Include="threadsafe_queue.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -29,10 +29,10 @@
     <ClInclude Include="server.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Client\threadsafe_queue.h">
+    <ClInclude Include="constants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="constants.h">
+    <ClInclude Include="threadsafe_queue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
