@@ -31,20 +31,20 @@ namespace threadsafe
 			_cv.notify_one();
 		}
 
-		void get(T & dest) // blocking
+		void get(T & dest) // blocking (cancel using quit())
 		{
 			std::lock_guard<std::mutex> lock(_mutex);
-			_cv.wait(lock, [this] { return !_queue.empty() || quit; });
-			if (quit) throw queue_quit;
+			_cv.wait(lock, [this] { return !_queue.empty() || _quit; });
+			if (_quit) throw queue_quit();
 			dest = _queue.front();
 			_queue.pop();
 		}
 
-		T get() // blocking
+		T get() // blocking (cancel using quit())
 		{
 			std::unique_lock<std::mutex> lock(_mutex);
-			_cv.wait(lock, [this] { return !_queue.empty() || quit; });
-			if (quit) throw queue_quit;
+			_cv.wait(lock, [this] { return !_queue.empty() || _quit; });
+			if (_quit) throw queue_quit();
 			T data = _queue.front();
 			_queue.pop();
 			return data;
@@ -65,7 +65,7 @@ namespace threadsafe
 		void quit()
 		{
 			std::lock_guard<std::mutex> lock(_mutex);
-			quit = true;
+			_quit = true;
 			_cv.notify_all();
 		}
 
@@ -74,6 +74,6 @@ namespace threadsafe
 		std::condition_variable _cv;
 		std::queue<T> _queue;
 
-		bool quit = false;
+		bool _quit = false;
 	};
 }
