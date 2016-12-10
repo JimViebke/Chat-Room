@@ -119,9 +119,14 @@ void Server::listen_for_new_users()
 		// kill this thread if the connection listener fails
 		if (connection == nullptr)
 		{
-			// kill this thread once all users are cleaned up
-			std::unique_lock<std::mutex> lock(users_mutex);
-			no_more_users.wait(lock, [this] { return users.empty(); });
+			// if the server is closing down, wait for child threads to detect it and close
+			if (finished)
+			{
+				std::lock_guard<std::mutex> lock(users_mutex);
+				for (auto user : users)
+					user.second.thread->join();
+			}
+
 			return;
 		}
 
@@ -149,8 +154,13 @@ void Server::listen_for_new_users()
 			send_to_room("main", (C::INFO_FLAG + users[connection->get_id()].user_name + " has joined the room"), connection->get_id());
 		}
 
+		// save the thread in the user object
+		{
+			std::lock_guard<std::mutex> lock(users_mutex);
+			users[connection->get_id()].thread = std::make_shared<std::thread>(&Server::receive, this, connection);
+		}
+
 		// start the user's receive thread
-		std::thread(&Server::receive, this, connection).detach();
 	}
 
 }
@@ -168,11 +178,12 @@ void Server::receive(const connection_ptr connection)
 		catch (pipedat::disgraceful_disconnect_exception) {}
 		catch (std::exception) {}
 
+		if (finished) return;
+
 		// in the event of a disconnect or failure, an empty message signals the server to clean up after the user
 		if (data.size() == 0)
 		{
 			remove_user(connection);
-			return;
 		}
 
 		// save the user's message
@@ -384,7 +395,4 @@ void Server::remove_user(const connection_ptr connection)
 
 	// Since the user has left the server, remove them from the server's list of users
 	users.erase(user_it);
-
-	// wake waiting threads if all users have disconnected
-	if (users.empty()) no_more_users.notify_all();
 }
