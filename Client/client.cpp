@@ -162,10 +162,8 @@ void Client::receive()
 	}
 	catch (pipedat::disgraceful_disconnect_exception)
 	{
-		display->add("The server has been shutdown by the host.", C::TEXT_ERROR);
 	}
 	catch (std::exception)
 	{
-		display->add("The server has unexpectedly shutdown.", C::TEXT_ERROR);
 	}
 }

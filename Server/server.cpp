@@ -87,7 +87,7 @@ void Server::listen_for_new_users()
 		// Notify the other users in the room
 		{
 			std::lock_guard<std::mutex> lock(users_mutex);
-			send_to_room("main", users[connection->get_id()].user_name + " has joined the room", connection->get_id());
+			send_to_room("main", (C::INFO_FLAG + users[connection->get_id()].user_name + " has joined the room"), connection->get_id());
 		}
 
 		// start a thread to listen to this user
