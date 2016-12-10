@@ -42,7 +42,7 @@ ConnectionWindow::ConnectionWindow(const unsigned &height, const unsigned &width
 	Console_Framework::set_cursor_position(unsigned(height - ystart), unsigned(label.size() + padding));
 }
 
-std::string ConnectionWindow::run()
+std::unique_ptr<pipedat::Connection> ConnectionWindow::run()
 {
 	for (;;)
 	{
@@ -54,7 +54,7 @@ std::string ConnectionWindow::run()
 		{
 			if (const Console_Framework::done_event_ptr done = Console_Framework::convert_to<Console_Framework::Done_Event>(event))
 			{
-				return "";
+				return nullptr;
 			}
 			else if (const Console_Framework::key_event_ptr key_event = Console_Framework::convert_to<Console_Framework::Key_Event>(event))
 			{
@@ -65,53 +65,29 @@ std::string ConnectionWindow::run()
 					std::string error;
 					std::string ip_and_port = text_box->take_contents();
 
-					// Verify the ip address
-					if (ip_and_port.find("::") == std::string::npos)
-						error = "error: Entered string was not in format ipaddress::port.";
-					else
+					// Check if the entered string is in a valid format
+					error = is_valid_input(ip_and_port);
+
+					try
 					{
-						// Get the ipaddress and port number
-						std::string ip_address = ip_and_port.substr(0, ip_and_port.find("::"));
-						std::string s_port = ip_and_port.substr(ip_and_port.find("::") + 2, ip_and_port.size());
-
-						try
+						if (error == "")
 						{
-							// This will thorw an error if the port number is not a number
-							unsigned uport = stoi(s_port);
+							const std::string ip_address = ip_and_port.substr(0, ip_and_port.find("::"));
+							const std::string p = ip_and_port.substr(ip_and_port.find("::") + 2, ip_and_port.size());
+							const unsigned port = stoi(p);
 
-							try
-							{
-								std::vector<std::string> pieces;
-								split(ip_address, '.', pieces);
+							std::unique_ptr<pipedat::Connection> connection = std::make_unique<pipedat::Connection>(ip_address, port);
 
-								if (pieces.size() != 4)
-									throw std::exception();
-
-								unsigned piece;
-								for (std::string p : pieces)
-								{
-									// The following will throw an exception to be caught if pieces cannot be put into an integer
-									piece = stoi(p);
-
-									// A single piece should not be over 255
-									if (piece > 255)
-										throw std::exception();
-								}
-							}
-							catch (std::exception ex)
-							{
-								error = "error: Invalid ipaddress.";
-							}
+							return std::move(connection);
 						}
-						catch (std::exception ex)
-						{
-							error = "error: Invalid port number.";
-						}
+						else
+							throw std::exception();
 					}
-
-					// If there was an error, display that error. Otherwise return the ip and port address
-					if (error.size() != 0)
+					catch (std::exception)
 					{
+						if(error == "")
+							error = "error: Could not bind to ipaddress and port.";
+
 						// Clear the previous error if there is one
 						for (unsigned i = 0; i < width; ++i)
 							Console_Framework::draw_char(height - 1, (i + 1), ' ', Constants::TEXT_COLOR);
@@ -120,9 +96,6 @@ std::string ConnectionWindow::run()
 						for (unsigned i = 0; i < error.size(); ++i)
 							Console_Framework::draw_char(height - 1, (i + 1), error[i], Constants::TEXT_COLOR);
 					}
-					else
-						return ip_and_port;
-
 				}
 				else // all other key events
 				{
@@ -130,6 +103,56 @@ std::string ConnectionWindow::run()
 					text_box->add_char(key_event->get_char());
 				}
 			}
+		}
+	}
+}
+
+std::string ConnectionWindow::is_valid_input(const std::string &ip_and_port)
+{
+	// Verify the ip address
+	if (ip_and_port.find("::") == std::string::npos)
+		return "error: Entered string was not in format ipaddress::port.";
+	else
+	{
+		// Get the ipaddress and port number
+		std::string ip_address = ip_and_port.substr(0, ip_and_port.find("::"));
+		std::string s_port = ip_and_port.substr(ip_and_port.find("::") + 2, ip_and_port.size());
+
+		try
+		{
+			// This will thorw an error if the port number is not a number
+			unsigned uport = stoi(s_port);
+
+			try
+			{
+				std::vector<std::string> pieces;
+				split(ip_address, '.', pieces);
+
+				if (pieces.size() != 4)
+					throw std::exception();
+
+				unsigned piece;
+				for (std::string p : pieces)
+				{
+					// The following will throw an exception to be caught if pieces cannot be put into an integer
+					piece = stoi(p);
+
+					// A single piece should not be over 255
+					if (piece > 255)
+						throw std::exception();
+				}
+
+				// There are no issues with the entered string
+				return "";
+			}
+			catch (std::exception ex)
+			{
+				return "error: Invalid ipaddress.";
+			}
+		}
+		catch (std::exception ex)
+		{
+			return "error: Invalid port number.";
 		}
 	}
 }

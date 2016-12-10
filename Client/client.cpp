@@ -6,7 +6,7 @@
 #include <sstream>
 #include <iterator>
 
-Client::Client(const unsigned &height, const unsigned &width, const std::string & ip, const unsigned & port)
+Client::Client(const unsigned &height, const unsigned &width, std::unique_ptr<pipedat::Connection> &con)
 {
 	// configure the console
 	Console_Framework::setup(height, width, "Chat Room");
@@ -25,15 +25,7 @@ Client::Client(const unsigned &height, const unsigned &width, const std::string 
 	Console_Framework::set_cursor_visibility(true);
 	Console_Framework::set_cursor_position(height - 2, 3);
 
-	try
-	{
-		connection = std::make_unique<pipedat::Connection>(ip, port);
-	}
-	catch (std::exception & ex)
-	{
-		this->display->add(ex.what(), C::TEXT_ERROR);
-		std::cin.ignore();
-	}
+	connection = std::move(con);
 }
 
 void Client::run()

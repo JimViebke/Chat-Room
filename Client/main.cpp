@@ -25,15 +25,9 @@ int main()
 	_CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDOUT);
 #endif
 
-	const std::string ip_and_port =  ConnectionWindow(4, 70).run();
+	std::unique_ptr<pipedat::Connection> connection = ConnectionWindow(4, 70).run();
 
-	if (ip_and_port == "") return EXIT_FAILURE;
-
-	const std::string ip_address = ip_and_port.substr(0, ip_and_port.find("::"));
-	const std::string p = ip_and_port.substr(ip_and_port.find("::") + 2, ip_and_port.size());
-	const unsigned port = stoi(p);
-
-	Client client(50, 100, ip_address, port);
+	Client client(50, 100, std::move(connection));
 	client.run();
 
 	_CrtDumpMemoryLeaks();

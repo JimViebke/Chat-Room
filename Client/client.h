@@ -2,6 +2,7 @@
 
 // standard libraries
 #include <mutex>
+#include <memory>
 
 // custom libraries
 #include <socket-lib.hpp>
@@ -22,7 +23,7 @@ private:
 	std::unique_ptr<pipedat::Connection> connection;
 
 public:
-	Client(const unsigned &height, const unsigned &width, const std::string & ip, const unsigned & port);
+	Client(const unsigned &height, const unsigned &width, std::unique_ptr<pipedat::Connection> &connection);
 	~Client() { Console_Framework::restore_console(); }
 
 	void run();
