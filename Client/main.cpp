@@ -27,6 +27,9 @@ int main()
 
 	std::unique_ptr<pipedat::Connection> connection = ConnectionWindow(4, 70).run();
 
+	if (connection == nullptr)
+		return EXIT_SUCCESS;
+
 	Client client(50, 100, std::move(connection));
 	client.run();
 }
