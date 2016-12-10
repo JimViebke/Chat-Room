@@ -87,7 +87,20 @@ Scrollable_Text_Display::Scrollable_Text_Display(const unsigned & set_x, const u
 
 void Scrollable_Text_Display::add(const std::string & add, const Console_Framework::color_type & color)
 {
-	data.push_back(Scrollable_Text_Display::Line(add, color));
+	std::string line = add;
+	for(;;)
+	{
+		if (line.size() > _width)
+		{
+			data.push_back(Scrollable_Text_Display::Line(line.substr(0, _width), color));
+			line = line.substr(_width);
+		}
+		else
+		{
+			data.push_back(Scrollable_Text_Display::Line(line, color));
+			break;
+		}
+	}
 
 	// if text will render beneath the view
 	if (data.size() > _height)

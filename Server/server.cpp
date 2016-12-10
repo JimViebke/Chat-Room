@@ -303,7 +303,7 @@ void Server::remove_user(const connection_ptr connection)
 	const auto user_it = users.find(connection->get_id());
 
 	// Tell the other users that this user has left the room
-	send_to_room(user_it->second.room_name, user_it->second.user_name + " has left the room.", user_it->second.connection->get_id());
+	send_to_room(user_it->second.room_name, (C::INFO_FLAG + user_it->second.user_name + " has left the room."), user_it->second.connection->get_id());
 
 	// Lock the rooms mutex as we need to remove the user from this room
 	std::lock_guard<std::mutex> room_lock(room_mutex);
