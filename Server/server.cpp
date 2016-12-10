@@ -88,6 +88,10 @@ void Server::handle_events()
 			if (const Console_Framework::done_event_ptr done_event = Console_Framework::convert_to<Console_Framework::Done_Event>(event))
 			{
 				finished = true;
+
+				input_queue.quit();
+				output_queue.quit();
+
 				return; // Destroy this thread as it no longer needed
 			}
 		}
