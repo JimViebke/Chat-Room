@@ -30,6 +30,7 @@ private:
 	public:
 		connection_ptr connection;
 		std::string user_name, room_name;
+		std::shared_ptr<std::thread> thread = nullptr;
 		User_Info() {}
 		User_Info(connection_ptr set_connection, const std::string & set_name, const std::string & set_room)
 			: connection(set_connection), user_name(set_name), room_name(set_room) {}
