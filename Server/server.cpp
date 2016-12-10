@@ -1,4 +1,4 @@
-
+#include "constants.h"
 #include "server.h"
 
 #include <sstream>
@@ -149,7 +149,7 @@ void Server::handle_commands(const connection_ptr connection, const std::vector<
 		}
 		else if (commands.size() > 2)
 		{
-			send_to_user(connection->get_id(), "info:You cannot have spaces in your username.");
+			send_to_user(connection->get_id(), (C::INFO_FLAG + "You cannot have spaces in your username."));
 			return;
 		}
 
@@ -157,15 +157,15 @@ void Server::handle_commands(const connection_ptr connection, const std::vector<
 		{
 			if (user.second.user_name == commands[1])
 			{
-				send_to_user(connection->get_id(), ("info:" + commands[1] + " is already in use."));
+				send_to_user(connection->get_id(), (C::INFO_FLAG + commands[1] + " is already in use."));
 				return;
 			}
 		}
 
 		// tell the room that the user has changed their name
-		send_to_room(user_it->second.room_name, ("info:" + user_it->second.user_name + " has changed their name to " + commands[1]), user_it->second.connection->get_id());
+		send_to_room(user_it->second.room_name, (C::INFO_FLAG + user_it->second.user_name + " has changed their name to " + commands[1]), user_it->second.connection->get_id());
 
-		send_to_user(user_it->second.connection->get_id(), "info:You have changed your name to " + commands[1]);
+		send_to_user(user_it->second.connection->get_id(), (C::INFO_FLAG + "You have changed your name to " + commands[1]));
 
 		// Change the user's name
 		user_it->second.user_name = commands[1];
@@ -178,14 +178,14 @@ void Server::handle_commands(const connection_ptr connection, const std::vector<
 		}
 		else if (commands.size() > 2)
 		{
-			send_to_user(connection->get_id(), "info:You cannot have spaces in your room names.");
+			send_to_user(connection->get_id(), (C::INFO_FLAG + "You cannot have spaces in your room names."));
 			return;
 		}
 
 		const std::string new_room_name = commands[1];
 
 		// Tell the other users that this user has left the room
-		send_to_room(user_it->second.room_name, "info:" + user_it->second.user_name + " has left the room.", user_it->second.connection->get_id());
+		send_to_room(user_it->second.room_name, (C::INFO_FLAG + user_it->second.user_name + " has left the room."), user_it->second.connection->get_id());
 
 		// Remove the user from the current room and add them to the new room
 		{
@@ -213,11 +213,11 @@ void Server::handle_commands(const connection_ptr connection, const std::vector<
 		user_it->second.room_name = new_room_name;
 		
 		// Tell the other users that this user has joined the room
-		send_to_room(user_it->second.room_name, "info:" + user_it->second.user_name + " has joined the room.", user_it->second.connection->get_id());
+		send_to_room(user_it->second.room_name, (C::INFO_FLAG + user_it->second.user_name + " has joined the room."), user_it->second.connection->get_id());
 
 		// Tell the user that they have joined the room. We can't do this client-side, because a client
 		// has no guarantees of the functionality of the server.
-		send_to_user(user_it->first, "info:You have joined " + new_room_name + ".");
+		send_to_user(user_it->first, (C::INFO_FLAG + "You have joined " + new_room_name + "."));
 	}
 	else if (command == "/whisper" || command == "/w")
 	{
@@ -241,7 +241,7 @@ void Server::handle_commands(const connection_ptr connection, const std::vector<
 					// Remove the last space at the end of the message
 					message = message.substr(0, message.size() - 1);
 
-					send_to_user(user.second.connection->get_id(), ("whisper:" + user_it->second.user_name + ": " + message));
+					send_to_user(user.second.connection->get_id(), (C::WHISPER_FLAG + user_it->second.user_name + ": " + message));
 
 					user_exists = true;
 					break;
@@ -249,26 +249,26 @@ void Server::handle_commands(const connection_ptr connection, const std::vector<
 			}
 
 			if (!user_exists)
-				send_to_user(user_it->first, "info:A user with username: " + receiver + " is not online.");
+				send_to_user(user_it->first, (C::INFO_FLAG + "A user with username: " + receiver + " is not online."));
 		}
 		else
-			send_to_user(user_it->first, "info:You must specify a user to whisper to.");
+			send_to_user(user_it->first, (C::INFO_FLAG + "You must specify a user to whisper to."));
 	}
 	else if (command == "/help" || command == "/h")
 	{
-		std::string help_message = "help:Use one of the following commands:";
-		help_message += "help:up arrow key - Used to scroll up through previous messages in the chat room.";
-		help_message += "help:down arrow key - Used to scroll down through messages in the chat room.";
-		help_message += "help:/name | /n - Used in conjunction with a new name to change your name.";
-		help_message += "help:/join | /j - Used in conjunction with a room name to join a new room.";
-		help_message += "help:/whisper | /w - Use this command in conjunction with the name of the person you'd like to whisper and a message.";
-		help_message += "help:/exit | /e - Used to exit the application.";
+		std::string help_message = C::HELP_FLAG + "Use one of the following commands:";
+		help_message += C::HELP_FLAG + "up arrow key - Used to scroll up through previous messages in the chat room.";
+		help_message += C::HELP_FLAG + "down arrow key - Used to scroll down through messages in the chat room.";
+		help_message += C::HELP_FLAG + "/name | /n - Used in conjunction with a new name to change your name.";
+		help_message += C::HELP_FLAG + "/join | /j - Used in conjunction with a room name to join a new room.";
+		help_message += C::HELP_FLAG + "/whisper | /w - Use this command in conjunction with the name of the person you'd like to whisper and a message.";
+		help_message += C::HELP_FLAG + "/exit | /e - Used to exit the application.";
 
 		send_to_user(user_it->first, help_message);
 	}
 	else
 	{
-		send_to_user(user_it->first, ("info:" + commands[0] + "is not a recognized command. Use /help to view a list of commands."));
+		send_to_user(user_it->first, (C::INFO_FLAG + commands[0] + "is not a recognized command. Use /help to view a list of commands."));
 	}
 }
 
