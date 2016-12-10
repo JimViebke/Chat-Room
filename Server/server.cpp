@@ -106,14 +106,8 @@ void Server::receive(const connection_ptr connection)
 		{
 			data = connection->receive();
 		}
-		catch (pipedat::disgraceful_disconnect_exception & dde)
-		{
-			std::cout << "Caught disgraceful_disconnect_exception on connection->receive(). Error message: [" + std::string(dde.what()) + "].";
-		}
-		catch (std::exception & ex)
-		{
-			std::cout << "Caught std::exception connection->receive(). Error message: [" + std::string(ex.what()) + "].";
-		}
+		catch (pipedat::disgraceful_disconnect_exception) { }
+		catch (std::exception) { }
 
 		// in the event of a disconnect or failure, an empty message signals the server to clean up after the user
 		if (data.size() == 0)
@@ -149,41 +143,49 @@ void Server::handle_commands(const connection_ptr connection, const std::vector<
 
 	if (command == "/name" || command == "/n")
 	{
-		// Get the new username
-		std::string new_user_name;
-		for(unsigned i = 1; i < commands.size(); ++i)
-			new_user_name += commands[i] + " ";
-
-		// Remove the last space at the end of the name
-		new_user_name = new_user_name.substr(0, new_user_name.size() - 1);
-
-		if (commands.size() < 2) return;
+		if (commands.size() < 2)
+		{
+			return;
+		}
+		else if (commands.size() > 2)
+		{
+			send_to_user(connection->get_id(), "info:You cannot have spaces in your username.");
+			return;
+		}
 
 		for (const auto & user : users)
 		{
-			if (user.second.user_name == new_user_name)
+			if (user.second.user_name == commands[1])
 			{
-				send_to_user(connection->get_id(), new_user_name + " is already in use.");
+				send_to_user(connection->get_id(), ("info:" + commands[1] + " is already in use."));
 				return;
 			}
 		}
 
 		// tell the room that the user has changed their name
-		send_to_room(user_it->second.room_name, user_it->second.user_name + " has changed their name to " + new_user_name, user_it->second.connection->get_id());
+		send_to_room(user_it->second.room_name, ("info:" + user_it->second.user_name + " has changed their name to " + commands[1]), user_it->second.connection->get_id());
 
-		send_to_user(user_it->second.connection->get_id(), "You have changed your name to " + new_user_name);
+		send_to_user(user_it->second.connection->get_id(), "info:You have changed your name to " + commands[1]);
 
 		// Change the user's name
-		user_it->second.user_name = new_user_name;
+		user_it->second.user_name = commands[1];
 	}
 	else if (command == "/join" || command == "/j")
 	{
+		if (commands.size() < 2)
+		{
+			return;
+		}
+		else if (commands.size() > 2)
+		{
+			send_to_user(connection->get_id(), "info:You cannot have spaces in your room names.");
+			return;
+		}
+
 		const std::string new_room_name = commands[1];
 
-		if (commands.size() < 2) return;
-
 		// Tell the other users that this user has left the room
-		send_to_room(user_it->second.room_name, user_it->second.user_name + " has left the room.", user_it->second.connection->get_id());
+		send_to_room(user_it->second.room_name, "info:" + user_it->second.user_name + " has left the room.", user_it->second.connection->get_id());
 
 		// Remove the user from the current room and add them to the new room
 		{
@@ -211,11 +213,11 @@ void Server::handle_commands(const connection_ptr connection, const std::vector<
 		user_it->second.room_name = new_room_name;
 		
 		// Tell the other users that this user has joined the room
-		send_to_room(user_it->second.room_name, user_it->second.user_name + " has joined the room.", user_it->second.connection->get_id());
+		send_to_room(user_it->second.room_name, "info:" + user_it->second.user_name + " has joined the room.", user_it->second.connection->get_id());
 
 		// Tell the user that they have joined the room. We can't do this client-side, because a client
 		// has no guarantees of the functionality of the server.
-		send_to_user(user_it->first, "You have joined " + new_room_name + ".");
+		send_to_user(user_it->first, "info:You have joined " + new_room_name + ".");
 	}
 	else if (command == "/whisper" || command == "/w")
 	{
@@ -239,7 +241,7 @@ void Server::handle_commands(const connection_ptr connection, const std::vector<
 					// Remove the last space at the end of the message
 					message = message.substr(0, message.size() - 1);
 
-					send_to_user(user.second.connection->get_id(), (user_it->second.user_name + ": " + message));
+					send_to_user(user.second.connection->get_id(), ("whisper:" + user_it->second.user_name + ": " + message));
 
 					user_exists = true;
 					break;
@@ -247,10 +249,10 @@ void Server::handle_commands(const connection_ptr connection, const std::vector<
 			}
 
 			if (!user_exists)
-				send_to_user(user_it->first, "A user with username: " + receiver + " is not online.");
+				send_to_user(user_it->first, "info:A user with username: " + receiver + " is not online.");
 		}
 		else
-			send_to_user(user_it->first, "You must specify a user to whisper to.");
+			send_to_user(user_it->first, "info:You must specify a user to whisper to.");
 	}
 	else if (command == "/help" || command == "/h")
 	{
@@ -266,7 +268,7 @@ void Server::handle_commands(const connection_ptr connection, const std::vector<
 	}
 	else
 	{
-		send_to_user(user_it->first, commands[0] + "is not a recognized command. Use /help to view a list of commands.");
+		send_to_user(user_it->first, ("info:" + commands[0] + "is not a recognized command. Use /help to view a list of commands."));
 	}
 }
 
