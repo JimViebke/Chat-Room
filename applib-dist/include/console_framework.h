@@ -51,7 +51,8 @@ public:
 		foreground_green = FOREGROUND_GREEN | FOREGROUND_INTENSITY,
 		foreground_blue = FOREGROUND_BLUE | FOREGROUND_INTENSITY,
 		foreground_yellow = FOREGROUND_RED | FOREGROUND_GREEN,
-		foreground_white = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE
+		foreground_white = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY,
+		foreground_grey = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE,
 	};
 
 	// publicly define event types
