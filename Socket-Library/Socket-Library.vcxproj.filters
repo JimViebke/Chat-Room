@@ -26,7 +26,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\applib-dist\include\socket-lib.cpp">
+    <ClCompile Include="socket-lib.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
