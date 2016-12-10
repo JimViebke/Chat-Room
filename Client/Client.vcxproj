@@ -298,6 +298,7 @@
   <ItemGroup>
     <ClCompile Include="client.cpp" />
     <ClCompile Include="connnection_window.cpp" />
+    <ClCompile Include="constants.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="tui_element\tui_element.cpp" />
   </ItemGroup>

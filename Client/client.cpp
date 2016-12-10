@@ -105,16 +105,25 @@ void Client::receive()
 	{
 		for (;;)
 		{
-			const std::string message = connection->receive();
+			std::string message = connection->receive();
 
 			Console_Framework::color_type color = C::TEXT_DEFAULT;
 
-			if (message.size() >= 5 && message.substr(0, 5) == "help:")
+			if (message.size() >= C::HELP_FLAG.size() && message.substr(0, C::HELP_FLAG.size()) == C::HELP_FLAG)
+			{
+				message = message.substr(C::HELP_FLAG.size());
 				color = C::TEXT_INFO;
-			else if (message.size() >= 8 && message.substr(0, 8) == "whisper:")
+			}
+			else if (message.size() >= C::WHISPER_FLAG.size() && message.substr(0, C::WHISPER_FLAG.size()) == C::WHISPER_FLAG)
+			{
+				message = message.substr(C::WHISPER_FLAG.size());
 				color = C::TEXT_WHISPER;
-			else if (message.size() >= 5 && message.substr(0, 5) == "info:")
+			}
+			else if (message.size() >= C::INFO_FLAG.size() && message.substr(0, C::INFO_FLAG.size()) == C::INFO_FLAG)
+			{
+				message = message.substr(C::INFO_FLAG.size());
 				color = C::TEXT_INFO;
+			}
 
 			std::lock_guard<std::mutex> lock(display_mutex);
 			display->add(message, color);
