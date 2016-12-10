@@ -78,7 +78,22 @@ void Client::run()
 					if (strings.size() > 1 && strings[0] == "/name")
 						user_name = message.substr(6, message.size());
 
-					display->add(user_name + ": " + message, C::TEXT_DEFAULT);
+					// if the user entered a command, don't render it (let the server send the results)
+					if (message.size() > 0 && message[0] == '/')
+					{
+						// ...unless the command was a non-empty whisper
+						if (strings.size() >= 3 && (strings[0] == "/w" || strings[0] == "/whisper"))
+						{
+							std::stringstream ss;
+							// substring, skipping over the first two words, plus two spaces
+							ss << "You whispered to " << strings[1] << ": " << message.substr(strings[0].size() + strings[1].size() + 2);
+							display->add(ss.str(), C::TEXT_WHISPER);
+						}
+					}
+					else // no command was entered, render the message
+					{
+						display->add(user_name + ": " + message, C::TEXT_DEFAULT);
+					}
 
 					if (message == "/exit" || message == "/e")
 					{
