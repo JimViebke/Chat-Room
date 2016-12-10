@@ -22,6 +22,4 @@ int main()
 
 	Server server(20, 40);
 	server.run();
-
-	_CrtDumpMemoryLeaks();
 }

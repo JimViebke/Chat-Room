@@ -29,6 +29,4 @@ int main()
 
 	Client client(50, 100, std::move(connection));
 	client.run();
-
-	_CrtDumpMemoryLeaks();
 }
