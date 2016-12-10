@@ -152,7 +152,7 @@ void Client::receive()
 					display->add(line, C::TEXT_INFO);
 					message.erase(0, index + C::HELP_FLAG.size());
 				}
-				display->add(line, C::TEXT_INFO);
+				// display->add(line, C::TEXT_INFO);
 			}
 			else
 			{
