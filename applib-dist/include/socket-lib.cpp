@@ -80,6 +80,11 @@ std::string Connection::receive() const
 	}
 }
 
+void Connection::shut_down() const
+{
+	shutdown(con_socket, SD_BOTH);
+}
+
 #pragma endregion
 
 #pragma region ConnectionListener Functions
