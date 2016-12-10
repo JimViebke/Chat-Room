@@ -31,7 +31,7 @@ Client::Client(const unsigned &height, const unsigned &width, const std::string 
 	}
 	catch (std::exception & ex)
 	{
-		this->display->add(ex.what());
+		this->display->add(ex.what(), C::TEXT_ERROR);
 		std::cin.ignore();
 	}
 }
@@ -78,7 +78,7 @@ void Client::run()
 					if (strings.size() > 1 && strings[0] == "/name")
 						user_name = message.substr(6, message.size());
 
-					display->add(user_name + ": " + message);
+					display->add(user_name + ": " + message, C::TEXT_DEFAULT);
 
 					if (message == "/exit" || message == "/e")
 					{
@@ -106,16 +106,26 @@ void Client::receive()
 		for (;;)
 		{
 			const std::string message = connection->receive();
+
+			Console_Framework::color_type color = C::TEXT_DEFAULT;
+
+			if (message.size() >= 5 && message.substr(0, 5) == "help:")
+				color = C::TEXT_INFO;
+			else if (message.size() >= 8 && message.substr(0, 8) == "whisper:")
+				color = C::TEXT_WHISPER;
+			else if (message.size() >= 5 && message.substr(0, 5) == "info:")
+				color = C::TEXT_INFO;
+
 			std::lock_guard<std::mutex> lock(display_mutex);
-			display->add(message);
+			display->add(message, color);
 		}
 	}
 	catch (pipedat::disgraceful_disconnect_exception)
 	{
-		display->add("The server has been shutdown by the host.");
+		display->add("The server has been shutdown by the host.", C::TEXT_ERROR);
 	}
 	catch (std::exception)
 	{
-		display->add("The server has unexpectedly shutdown.");
+		display->add("The server has unexpectedly shutdown.", C::TEXT_ERROR);
 	}
 }

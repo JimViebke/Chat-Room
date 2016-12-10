@@ -68,6 +68,8 @@ void Text_Box::render() const
 
 
 
+Scrollable_Text_Display::Line::Line(const std::string & set_data, const Console_Framework::color_type & set_color) : data(set_data), color(set_color) {}
+
 void Scrollable_Text_Display::render()
 {
 	// clear the viewer
@@ -77,15 +79,15 @@ void Scrollable_Text_Display::render()
 
 	// render the text
 	for (unsigned i = 0; i < std::min(_height, (unsigned)data.size() - _scroll_height); ++i)
-		Console_Framework::draw_string(_x + i, _y, data[i + _scroll_height].substr(0, std::min(_width, (unsigned)data[i + _scroll_height].size())), Console_Framework::foreground_white);
+		Console_Framework::draw_string(_x + i, _y, data[i + _scroll_height].data.substr(0, std::min(_width, (unsigned)data[i + _scroll_height].data.size())), data[i + _scroll_height].color);
 }
 
 Scrollable_Text_Display::Scrollable_Text_Display(const unsigned & set_x, const unsigned & set_y, const unsigned & set_height, const unsigned & set_width)
 	: TUI_Element(set_x, set_y), _height(set_height), _width(set_width) {}
 
-void Scrollable_Text_Display::add(const std::string & add)
+void Scrollable_Text_Display::add(const std::string & add, const Console_Framework::color_type & color)
 {
-	data.push_back(add);
+	data.push_back(Scrollable_Text_Display::Line(add, color));
 
 	// if text will render beneath the view
 	if (data.size() > _height)

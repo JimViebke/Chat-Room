@@ -39,15 +39,23 @@ private:
 class Scrollable_Text_Display : public TUI_Element
 {
 private:
+	class Line
+	{
+	public:
+		std::string data;
+		Console_Framework::color_type color;
+		Line(const std::string & set_data, const Console_Framework::color_type & set_color);
+	};
+
 	unsigned _height, _width, _scroll_height = 0;
-	std::vector<std::string> data;
+	std::vector<Line> data;
 
 	void render();
 
 public:
 	Scrollable_Text_Display(const unsigned & set_x, const unsigned & set_y, const unsigned & set_height, const unsigned & set_width);
 
-	void add(const std::string & add);
+	void add(const std::string & add, const Console_Framework::color_type & color);
 	void scroll(const Console_Framework::Scroll_Event::Direction & direction);
 	void clear();
 };
