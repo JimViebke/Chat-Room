@@ -39,7 +39,7 @@ Client::Client(const unsigned &height, const unsigned &width, const std::string 
 void Client::run()
 {
 	// start the receiving thread here
-	std::thread(&Client::receive, this).detach();
+	std::thread receive(&Client::receive, this);
 
 	for (;;)
 	{
@@ -52,6 +52,8 @@ void Client::run()
 			// if the event is a done event type
 			if (const Console_Framework::done_event_ptr done_event = Console_Framework::convert_to<Console_Framework::Done_Event>(event))
 			{
+				connection->shut_down();
+				receive.join();
 				return; // somehow kill the other thread (or just let it die)
 			}
 			else if (const Console_Framework::scroll_event_ptr scroll_event = Console_Framework::convert_to<Console_Framework::Scroll_Event>(event))
