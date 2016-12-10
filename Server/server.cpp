@@ -33,6 +33,9 @@ void Server::run()
 			// get the next message
 			const Message message = input_queue.get();
 
+			if (message.data.size() == 0)
+				continue;
+
 			// check if the user has entered a special command
 			if (message.data[0] == '/')
 			{
@@ -179,10 +182,13 @@ void Server::receive(const connection_ptr connection)
 		if (data.size() == 0)
 		{
 			remove_user(connection);
+			return;
 		}
-
-		// save the user's message
-		input_queue.put(Message(connection->get_id(), data));
+		else
+		{
+			// save the user's message
+			input_queue.put(Message(connection->get_id(), data));
+		}
 	}
 }
 

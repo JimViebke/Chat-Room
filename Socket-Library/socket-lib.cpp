@@ -67,9 +67,7 @@ std::string Connection::receive() const
 		int data_read = recv(con_socket, input, 1024, 0);
 
 		// Check for a graceful disconnect OR a less graceful disconnect
-		if (data_read == 0)
-			return "";
-		else if (data_read == -1)
+		if (data_read == 0 || data_read == -1)
 			throw disgraceful_disconnect_exception("data_read is -1");
 
 		std::stringstream ss;
