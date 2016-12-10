@@ -9,12 +9,10 @@ using namespace pipedat;
 
 Server::Server(const unsigned &height, const unsigned &width)
 {
-	// configure the console
+	// configure the window
 	Console_Framework::setup(height, width, "Server");
-
-	// start the cursor in the textbox
-	Console_Framework::set_cursor_visibility(true);
-	Console_Framework::set_cursor_position(height - 2, 3);
+	Console_Framework::set_cursor_position(0, 0);
+	Console_Framework::set_cursor_visibility(false);
 }
 
 void Server::run()
