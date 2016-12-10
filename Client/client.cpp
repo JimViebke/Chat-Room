@@ -141,7 +141,23 @@ void Client::receive()
 			}
 
 			std::lock_guard<std::mutex> lock(display_mutex);
-			display->add(message, color);
+
+			if (message.find(C::HELP_FLAG) != std::string::npos)
+			{
+				size_t index = 0;
+				std::string line;
+				while ((index = message.find(C::HELP_FLAG)) != std::string::npos)
+				{
+					line = message.substr(0, index);
+					display->add(line, C::TEXT_INFO);
+					message.erase(0, index + C::HELP_FLAG.size());
+				}
+				display->add(line, C::TEXT_INFO);
+			}
+			else
+			{
+				display->add(message, color);
+			}
 		}
 	}
 	catch (pipedat::disgraceful_disconnect_exception)
