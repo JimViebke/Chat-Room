@@ -123,6 +123,8 @@ connection_ptr ConnectionListener::wait_for_connection() const
 	// Get the new socket that the user has joined on
 	SOCKET client_ID = accept(listening_socket, (sockaddr*)&client_information, NULL);
 
+	if (client_ID == INVALID_SOCKET) return nullptr;
+
 	// Return the newly generated connection
 	return std::make_shared<Connection>(client_ID);
 }

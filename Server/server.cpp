@@ -28,50 +28,57 @@ void Server::run()
 	// start the handling of threads
 	std::thread events_thread(&Server::handle_events, this);
 
-	for (;;)
+	try
 	{
-		if (finished)
+		for (;;)
 		{
-			for (auto user : users)
-				user.second.connection->shut_down();
+			// get the next message
+			const Message message = input_queue.get();
 
-			new_users_thread.join();
-			send_thread.join();
-			events_thread.join();
-			return; // No more work to be done by the main thread
-		}
-
-		// get the next message
-		const Message message = input_queue.get();
-
-		// check if the user has entered a special command
-		if (message.data[0] == '/')
-		{
-			std::stringstream ss(message.data);
-			const std::istream_iterator<std::string> begin(ss);
-			std::vector<std::string> strings(begin, std::istream_iterator<std::string>());
-
-			if (strings.size() > 0)
+			// check if the user has entered a special command
+			if (message.data[0] == '/')
 			{
-				std::lock_guard<std::mutex> lock(users_mutex);
-				handle_commands(users[message.id].connection, strings);
+				std::stringstream ss(message.data);
+				const std::istream_iterator<std::string> begin(ss);
+				std::vector<std::string> strings(begin, std::istream_iterator<std::string>());
+
+				if (strings.size() > 0)
+				{
+					std::lock_guard<std::mutex> lock(users_mutex);
+					handle_commands(users[message.id].connection, strings);
+				}
+
+				continue;
 			}
 
-			continue;
+			// prepend the username to the message and retrieve the user's room
+			std::string data;
+			std::string room_name;
+			{
+				std::lock_guard<std::mutex> lock(users_mutex);
+				data = users[message.id].user_name + ": " + message.data;
+				room_name = users[message.id].room_name;
+			}
+
+			// forward their message to the room
+			send_to_room(room_name, data, message.id);
 		}
-		
-		// prepend the username to the message and retrieve the user's room
-		std::string data;
-		std::string room_name;
+	}
+	catch (threadsafe::queue<Message>::queue_quit)
+	{
+		// terminate each connection
 		{
 			std::lock_guard<std::mutex> lock(users_mutex);
-			data = users[message.id].user_name + ": " + message.data;
-			room_name = users[message.id].room_name;
+			for (auto user : users)
+				user.second.connection->shut_down();
 		}
 
-		// forward their message to the room
-		send_to_room(room_name, data, message.id);
+		// wait for the threads to exit
+		new_users_thread.join();
+		send_thread.join();
+		events_thread.join();
 	}
+
 }
 
 void Server::handle_events()
@@ -106,14 +113,17 @@ void Server::listen_for_new_users()
 
 	for (;;)
 	{
-		if (finished)
-		{
-			// Join all of the necessary threads and repent decision of fixing memory leaks
-
-		}
-
 		// get the next new connection
 		connection_ptr connection = connection_listener.wait_for_connection();
+
+		// kill this thread if the connection listener fails
+		if (connection == nullptr)
+		{
+			// kill this thread once all users are cleaned up
+			std::unique_lock<std::mutex> lock(users_mutex);
+			no_more_users.wait(lock, [this] { return users.empty(); });
+			return;
+		}
 
 		// build the username using a stringstreawm
 		std::stringstream ss;
@@ -139,7 +149,7 @@ void Server::listen_for_new_users()
 			send_to_room("main", (C::INFO_FLAG + users[connection->get_id()].user_name + " has joined the room"), connection->get_id());
 		}
 
-		// start a thread to listen to this user
+		// start the user's receive thread
 		std::thread(&Server::receive, this, connection).detach();
 	}
 
@@ -155,12 +165,12 @@ void Server::receive(const connection_ptr connection)
 		{
 			data = connection->receive();
 		}
-		catch (pipedat::disgraceful_disconnect_exception) { }
-		catch (std::exception) { }
+		catch (pipedat::disgraceful_disconnect_exception) {}
+		catch (std::exception) {}
 
 		// in the event of a disconnect or failure, an empty message signals the server to clean up after the user
 		if (data.size() == 0)
-		{			
+		{
 			remove_user(connection);
 			return;
 		}
@@ -172,14 +182,21 @@ void Server::receive(const connection_ptr connection)
 
 void Server::send()
 {
-	for (;;)
+	try
 	{
-		// get the next message on the queue
-		const Message message = output_queue.get();
-		// lock the user mutex
-		std::lock_guard<std::mutex> lock(users_mutex);
-		// send the message
-		users[message.id].connection->send(message.data);
+		for (;;)
+		{
+			// get the next message on the queue
+			const Message message = output_queue.get();
+			// lock the user mutex
+			std::lock_guard<std::mutex> lock(users_mutex);
+			// send the message
+			users[message.id].connection->send(message.data);
+		}
+	}
+	catch (threadsafe::queue<Message>::queue_quit)
+	{
+		// the thread now dies
 	}
 }
 
@@ -260,7 +277,7 @@ void Server::handle_commands(const connection_ptr connection, const std::vector<
 
 		// Move this user to the new room
 		user_it->second.room_name = new_room_name;
-		
+
 		// Tell the other users that this user has joined the room
 		send_to_room(user_it->second.room_name, (C::INFO_FLAG + user_it->second.user_name + " has joined the room."), user_it->second.connection->get_id());
 
@@ -367,4 +384,7 @@ void Server::remove_user(const connection_ptr connection)
 
 	// Since the user has left the server, remove them from the server's list of users
 	users.erase(user_it);
+
+	// wake waiting threads if all users have disconnected
+	if (users.empty()) no_more_users.notify_all();
 }

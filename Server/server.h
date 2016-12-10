@@ -32,7 +32,6 @@ private:
 	public:
 		connection_ptr connection;
 		std::string user_name, room_name;
-		std::shared_ptr<std::thread> thread = nullptr;
 		User_Info() {}
 		User_Info(connection_ptr set_connection, const std::string & set_name, const std::string & set_room)
 			: connection(set_connection), user_name(set_name), room_name(set_room) {}
@@ -41,6 +40,7 @@ private:
 	// map a username to a Connection and a room name
 	std::map<pipedat::ConnectionID, User_Info> users;
 	std::mutex users_mutex;
+	std::condition_variable no_more_users;
 
 	// map a room to its users
 	std::map<std::string, std::set<pipedat::ConnectionID>> rooms;
