@@ -7,21 +7,40 @@
 
 using namespace pipedat;
 
-Server::Server()
+Server::Server(const unsigned &height, const unsigned &width)
 {
+	// configure the console
+	Console_Framework::setup(height, width, "Server");
 
+	// start the cursor in the textbox
+	Console_Framework::set_cursor_visibility(true);
+	Console_Framework::set_cursor_position(height - 2, 3);
 }
 
 void Server::run()
 {
 	// start the listening thread
-	std::thread(&Server::listen_for_new_users, this).detach();
+	std::thread new_users_thread(&Server::listen_for_new_users, this);
 
 	// start the receiving thread
-	std::thread(&Server::send, this).detach();
+	std::thread send_thread(&Server::send, this);
+
+	// start the handling of threads
+	std::thread events_thread(&Server::handle_events, this);
 
 	for (;;)
 	{
+		if (finished)
+		{
+			for (auto user : users)
+				user.second.connection->shut_down();
+
+			new_users_thread.join();
+			send_thread.join();
+			events_thread.join();
+			return; // No more work to be done by the main thread
+		}
+
 		// get the next message
 		const Message message = input_queue.get();
 
@@ -55,6 +74,26 @@ void Server::run()
 	}
 }
 
+void Server::handle_events()
+{
+	for (;;)
+	{
+		// get the list of events that have occurred
+		const Console_Framework::event_list events = Console_Framework::get_events();
+
+		// for each event
+		for (const Console_Framework::event_ptr & event : events)
+		{
+			// if the event is a done event type
+			if (const Console_Framework::done_event_ptr done_event = Console_Framework::convert_to<Console_Framework::Done_Event>(event))
+			{
+				finished = true;
+				return; // Destroy this thread as it no longer needed
+			}
+		}
+	}
+}
+
 void Server::listen_for_new_users()
 {
 	const pipedat::ConnectionListener connection_listener(8050, SocketType::STREAM, Protocol::IPPROTO_TCP);
@@ -63,6 +102,12 @@ void Server::listen_for_new_users()
 
 	for (;;)
 	{
+		if (finished)
+		{
+			// Join all of the necessary threads and repent decision of fixing memory leaks
+
+		}
+
 		// get the next new connection
 		connection_ptr connection = connection_listener.wait_for_connection();
 

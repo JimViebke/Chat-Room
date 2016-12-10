@@ -35,5 +35,8 @@
     <ClInclude Include="threadsafe_queue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="console_framework.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

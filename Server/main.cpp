@@ -20,7 +20,7 @@ int main()
 	_CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDOUT);
 #endif
 
-	Server server;
+	Server server(50, 50);
 	server.run();
 
 	_CrtDumpMemoryLeaks();

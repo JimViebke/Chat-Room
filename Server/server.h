@@ -6,8 +6,10 @@
 #include <set>
 #include <string>
 #include <mutex>
+#include <atomic>
 
 #include "threadsafe_queue.h"
+#include "console_framework.h"
 
 // a simple class to bundle an ID with a string
 class Message
@@ -22,7 +24,7 @@ public:
 class Server
 {
 private:
-
+	std::atomic<bool> finished = false;
 	using connection_ptr = std::shared_ptr<pipedat::Connection>;
 
 	class User_Info
@@ -47,7 +49,7 @@ private:
 	threadsafe::queue<Message> input_queue, output_queue;
 
 public:
-	Server();
+	Server(const unsigned &height, const unsigned &width);
 
 	void run();
 
@@ -57,6 +59,8 @@ private:
 	void receive(const connection_ptr connection);
 
 	void send();
+
+	void handle_events();
 
 	void handle_commands(const connection_ptr connection, const std::vector<std::string> & commands);
 
