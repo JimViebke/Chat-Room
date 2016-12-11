@@ -146,7 +146,6 @@ void Client::receive()
 					display->add(line, C::TEXT_INFO);
 					message.erase(0, index + C::HELP_FLAG.size());
 				}
-				// display->add(line, C::TEXT_INFO);
 			}
 			else
 			{
@@ -156,8 +155,10 @@ void Client::receive()
 	}
 	catch (pipedat::disgraceful_disconnect_exception)
 	{
+		display->add("Server was shutdown by the host", C::TEXT_DEFAULT);
 	}
 	catch (std::exception)
 	{
+		display->add("Server shut down unexpectedly.", C::TEXT_DEFAULT);
 	}
 }
