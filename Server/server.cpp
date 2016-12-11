@@ -67,18 +67,19 @@ void Server::run()
 	}
 	catch (threadsafe::queue<Message>::queue_quit)
 	{
-		// terminate each connection
-		{
-			std::lock_guard<std::mutex> lock(users_mutex);
-			for (auto & user : users)
-				user.second->connection->shut_down();
-		}
-
-		// wait for the threads to exit
-		new_users_thread.join();
-		send_thread.join();
-		events_thread.join();
 	}
+
+	// terminate each connection
+	{
+		std::lock_guard<std::mutex> lock(users_mutex);
+		for (auto & user : users)
+			user.second->connection->shut_down();
+	}
+
+	// wait for the threads to exit
+	new_users_thread.join();
+	send_thread.join();
+	events_thread.join();
 
 }
 
@@ -101,6 +102,13 @@ void Server::handle_events()
 
 				input_queue.quit();
 				output_queue.quit();
+
+				// terminate each connection
+				{
+					std::lock_guard<std::mutex> lock(users_mutex);
+					for (auto & user : users)
+						user.second->connection->shut_down();
+				}
 
 				return; // Destroy this thread as it no longer needed
 			}
